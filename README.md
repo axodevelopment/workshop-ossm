@@ -1,5 +1,12 @@
 # workshop-ossm
 
+
+# pre reqs
+
+~/workshop-ossm/argocd/projects$ oc apply -f .
+
+
+
 for subs
 
 oc get packagemanifest -n openshift-marketplace | grep -iE "sail|service-mesh|kiali|opentelemetry"
