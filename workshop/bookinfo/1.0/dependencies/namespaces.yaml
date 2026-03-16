@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bookinfo
+  labels:
+    istio.io/dataplane-mode: ambient
+    istio.io/use-waypoint: bookinfo-waypoint
+    istio-discovery: enabled
+    openshift.io/user-monitoring: "true"
