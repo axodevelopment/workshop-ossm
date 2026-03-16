@@ -19,7 +19,9 @@ spec:
   - namespace: workshop-*
     server: https://kubernetes.default.svc
 
-  clusterResourceWhitelist: []
+  clusterResourceWhitelist:
+  - group: ""
+    kind: Namespace
 
   ### NOTES -> need to add more resources for workshop participants here
   namespaceResourceWhitelist:
