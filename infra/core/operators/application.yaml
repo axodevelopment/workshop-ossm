@@ -10,7 +10,7 @@ metadata:
 spec:
   project: infra
   source:
-    repoURL: https://github.com/your-org/service-mesh-platform
+    repoURL: https://github.com/axodevelopment/workshop-ossm
     targetRevision: main
     path: infra/operators
   destination:
