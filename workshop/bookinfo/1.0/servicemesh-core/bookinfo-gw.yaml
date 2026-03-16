@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: bookinfo-gw
   namespace: bookinfo
+  annotations:
+    argocd.argoproj.io/ignore-healthcheck: "true"
 spec:
   gatewayClassName: istio
   listeners:
