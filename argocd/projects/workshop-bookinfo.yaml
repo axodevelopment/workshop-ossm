@@ -67,3 +67,5 @@ spec:
     kind: Route
   - group: telemetry.istio.io
     kind: Telemetry
+  - group: "rbac.authorization.k8s.io"
+    kind: RoleBinding
