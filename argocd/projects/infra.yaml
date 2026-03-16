@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra
+  namespace: openshift-gitops
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Platform infra — operators, service mesh core, monitoring
+  sourceRepos:
+  - https://github.com/axodevelopment/workshop-ossm
+  destinations:
+  - namespace: "*"
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: "*"
+    kind: "*"
+  namespaceResourceWhitelist:
+  - group: "*"
+    kind: "*"
+  orphanedResources:
+    warn: true

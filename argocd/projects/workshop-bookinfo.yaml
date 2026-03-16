@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: workshop
+  namespace: openshift-gitops
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Workshop content — app namespaces only, no infra access
+  sourceRepos:
+  - https://github.com/axodevelopment/workshop-ossm
+  
+  ### NOTES -> I've added a qildcard section ie the workshop-* should be ok for now but...
+  destinations:
+  - namespace: bookinfo
+    server: https://kubernetes.default.svc
+  - namespace: grpc-mesh-demo
+    server: https://kubernetes.default.svc
+  - namespace: workshop-*
+    server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist: []
+
+  ### NOTES -> need to add more resources for workshop participants here
+  namespaceResourceWhitelist:
+  - group: ""
+    kind: Namespace
+  - group: ""
+    kind: Service
+  - group: ""
+    kind: ServiceAccount
+  - group: ""
+    kind: ConfigMap
+  - group: apps
+    kind: Deployment
+  - group: apps
+    kind: ReplicaSet
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+  - group: gateway.networking.k8s.io
+    kind: GRPCRoute
+  - group: gateway.networking.k8s.io
+    kind: TCPRoute
+  - group: networking.istio.io
+    kind: DestinationRule
+  - group: networking.istio.io
+    kind: VirtualService
+  - group: networking.istio.io
+    kind: ServiceEntry
+  - group: security.istio.io
+    kind: AuthorizationPolicy
+  - group: security.istio.io
+    kind: RequestAuthentication
+  - group: security.istio.io
+    kind: PeerAuthentication
+  - group: argoproj.io
+    kind: Rollout
+  - group: argoproj.io
+    kind: AnalysisTemplate
+  - group: argoproj.io
+    kind: AnalysisRun
+  - group: monitoring.coreos.com
+    kind: PodMonitor
+  - group: route.openshift.io
+    kind: Route
+  - group: telemetry.istio.io
+    kind: Telemetry
