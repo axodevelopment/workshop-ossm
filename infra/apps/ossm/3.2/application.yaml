@@ -1,13 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kiali
+  name: ossm-3-2
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
-  labels:
-    component: service-mesh
-    dependency: observability
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -15,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/axodevelopment/workshop-ossm
     targetRevision: main
-    path: infra/apps/kiali
+    path: infra/apps/ossm/3.2
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
@@ -27,7 +24,15 @@ spec:
     - CreateNamespace=true
     - ServerSideApply=true
   ignoreDifferences:
-  - group: kiali.io
-    kind: Kiali
+  - group: sailoperator.io
+    kind: Istio
+    jsonPointers:
+    - /status
+  - group: sailoperator.io
+    kind: IstioCNI
+    jsonPointers:
+    - /status
+  - group: sailoperator.io
+    kind: ZTunnel
     jsonPointers:
     - /status
