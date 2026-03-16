@@ -1,10 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra-operators
+  name: infra-core-namespaces
   namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    component: service-mesh
+    dependency: observability
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,13 +13,19 @@ spec:
   source:
     repoURL: https://github.com/axodevelopment/workshop-ossm
     targetRevision: main
-    path: infra/operators
+    path: infra/core/namespaces
   destination:
     server: https://kubernetes.default.svc
-    namespace: openshift-operators
+    namespace: openshift-gitops
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
+    - CreateNamespace=true
     - ServerSideApply=true
+  ignoreDifferences:
+  - group: kiali.io
+    kind: Kiali
+    jsonPointers:
+    - /status

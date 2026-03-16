@@ -1,25 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra-core-app-of-apps
+  name: infra-security
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
   finalizers:
   - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
 spec:
   project: infra
   source:
     repoURL: https://github.com/axodevelopment/workshop-ossm
     targetRevision: main
-    path: infra/core
-    directory:
-      recurse: true
-      include: "*/application.yaml"
+    path: infra/core/security
   destination:
     server: https://kubernetes.default.svc
-    namespace: openshift-gitops
+    namespace: openshift-operators
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+    - ServerSideApply=true
