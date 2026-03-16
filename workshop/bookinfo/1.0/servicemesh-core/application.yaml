@@ -11,7 +11,7 @@ metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default # TODO: move to workshop-*
+  project: workshop # TODO: move to workshop-*
   source:
     repoURL: https://github.com/axodevelopment/workshop-ossm
     targetRevision: main
