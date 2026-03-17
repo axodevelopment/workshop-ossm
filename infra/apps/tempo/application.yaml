@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  source:
+    repoURL: https://github.com/axodevelopment/workshop-ossm
+    targetRevision: main
+    path: infra/apps/tempo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tempo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+  ignoreDifferences:
+  - group: tempo.grafana.com
+    kind: TempoStack
+    jsonPointers:
+    - /status
