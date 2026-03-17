@@ -4,6 +4,9 @@ metadata:
   name: otel
   namespace: istio-system
 spec:
+  # adding to disable ztunnel HBONE  since this is in istio-system
+  podAnnotations:
+    ambient.istio.io/redirection: "disabled"
   config:
     receivers:
       otlp:

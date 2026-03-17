@@ -7,6 +7,8 @@ metadata:
   labels:
     openshift.io/user-monitoring: "true"
 
+# Ztunnel doesn't seem to work well because of mtls, maybe i need to 
+# do this connectivity only with side car?
 #apiVersion: v1
 #kind: Namespace
 #metadata:
