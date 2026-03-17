@@ -3,6 +3,8 @@ kind: Istio
 metadata:
   name: default
 spec:
+  namespace: istio-system
+  profile: ambient
   values:
     pilot:
       trustedZtunnelNamespace: ztunnel
