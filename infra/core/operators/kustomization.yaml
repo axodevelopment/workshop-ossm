@@ -4,3 +4,4 @@ resources:
 - ossm-subscription.yaml
 - kiali-subscription.yaml
 - otel-subscription.yaml
+- tempo-subscription.yaml

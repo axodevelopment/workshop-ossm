@@ -5,3 +5,4 @@ resources:
 - istio-cni.yaml
 - ztunnel.yaml
 - observability.yaml
+- tempo.yaml

@@ -1,0 +1,6 @@
+# This shouldn't be necessary as istio-system namespace should already be created by core... in theory.
+
+#apiVersion: project.openshift.io/v1
+#kind: Project
+#metadata:
+#  name: <permitted_project_of_opentelemetry_collector_instance>
