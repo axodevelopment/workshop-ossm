@@ -167,4 +167,6 @@ oc adm policy add-cluster-role-to-user cluster-admin \
   -z kiali-service-account \
   -n istio-system
 
-  
+oc adm policy add-role-to-user edit $(oc whoami) \
+  -n tempo \
+  --role-namespace=tempo
