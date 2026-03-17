@@ -5,5 +5,5 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
   labels:
-    istio-discovery: enabled
+    #istio-discovery: enabled
     openshift.io/user-monitoring: "true"
