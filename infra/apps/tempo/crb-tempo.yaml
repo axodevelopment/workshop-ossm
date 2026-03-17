@@ -1,29 +1,14 @@
+# ClusterRole for writing to tempo.grafana.com API group
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
-  name: otel-collector-tempo-write
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: tempo-tempo-gateway-tempo
-subjects:
-- kind: ServiceAccount
-  name: otel-collector
-  namespace: istio-system
+  name: tempo-write
+rules:
+- apiGroups: ["tempo.grafana.com"]
+  resources: ["*"]
+  verbs: ["create", "get", "list"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: otel-collector-traces-write
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: tempostack-traces-write
-subjects:
-- kind: ServiceAccount
-  name: otel-collector
-  namespace: istio-system
----
+# Gateway tokenreviews permission
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -37,6 +22,7 @@ subjects:
   name: otel-collector
   namespace: istio-system
 ---
+# TempoStack edit access
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -50,6 +36,22 @@ subjects:
   name: otel-collector
   namespace: istio-system
 ---
+# Namespace-scoped write binding for OPA SSAR check
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: otel-collector-tempo-write
+  namespace: tempo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tempo-write
+subjects:
+- kind: ServiceAccount
+  name: otel-collector
+  namespace: istio-system
+---
+# Allow all authenticated users to read traces (for Kiali)
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
