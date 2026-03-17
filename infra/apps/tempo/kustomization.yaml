@@ -6,3 +6,4 @@ resources:
 - tempostack.yaml
 - otel-collector.yaml
 - telemetry.yaml
+- crb-otel.yaml

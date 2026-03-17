@@ -1,0 +1,39 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: istio-system
+spec:
+  # adding to disable ztunnel HBONE  since this is in istio-system
+  podAnnotations:
+    ambient.istio.io/redirection: "disabled"
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: '0.0.0.0:4317'
+          http:
+            endpoint: '0.0.0.0:4318'
+
+    exporters:
+      otlp:
+        endpoint: 'tempo-tempo-distributor.tempo.svc.cluster.local:4317'
+        tls:
+          insecure: true
+
+      # remove
+      debug:
+        verbosity: basic
+
+    processors:
+      batch:
+        timeout: 5s
+        send_batch_size: 1000
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp, debug]   # remove
