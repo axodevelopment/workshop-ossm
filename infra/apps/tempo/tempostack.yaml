@@ -14,6 +14,9 @@ spec:
       limits:
         memory: 2Gi
         cpu: 2000m
+  # for now i'll keep this disabled see readme.md
+  networkPolicy:
+    enabled: false
   tenants:
     mode: openshift
     authentication:

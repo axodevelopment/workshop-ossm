@@ -85,3 +85,56 @@ oc get httproute bookinfo-ingress -n bookinfo \
 
 oc get routes -n tempo
 oc get svc -n tempo | grep gateway
+
+
+# ztuennel and otel iptable mapping issue
+
+oc delete pod -n istio-system -l app.kubernetes.io/name=otel-collector
+
+OTEL_POD=$(oc get pods -n istio-system -l app.kubernetes.io/name=otel-collector \
+  -o jsonpath='{.items[0].metadata.name}')
+
+oc get pod -n istio-system $OTEL_POD \
+  -o jsonpath='{.metadata.annotations}' | python3 -m json.tool
+
+oc exec -n istio-system $OTEL_POD -- iptables-save 2>/dev/null | grep -E "ISTIO|15008|4317" | head -20
+{
+    "ambient.istio.io/redirection": "disabled",
+    "argocd.argoproj.io/tracking-id": "tempo:opentelemetry.io/OpenTelemetryCollector:istio-system/otel",
+    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.128.0.180/23\"],\"mac_address\":\"0a:58:0a:80:00:b4\",\"gateway_ips\":[\"10.128.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.128.0.1\"}],\"ip_address\":\"10.128.0.180/23\",\"gateway_ip\":\"10.128.0.1\",\"role\":\"primary\"}}",
+    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.128.0.180\"\n    ],\n    \"mac\": \"0a:58:0a:80:00:b4\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+    "kubectl.kubernetes.io/restartedAt": "2026-03-17T01:46:25-04:00",
+    "openshift.io/scc": "restricted-v2",
+    "opentelemetry-operator-config/sha256": "53d80336c6929c5bc2ad6c260f3850a56aef51cc2e01ebed900ba85877adae10",
+    "prometheus.io/path": "/metrics",
+    "prometheus.io/port": "8888",
+    "prometheus.io/scrape": "true",
+    "seccomp.security.alpha.kubernetes.io/pod": "runtime/default",
+    "security.openshift.io/validated-scc-subject-type": "user"
+
+}
+
+networkPolicy is causing issue i'll disable that.
+
+will look at this in the future
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-otel-collector
+  namespace: tempo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: distributor
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: istio-system
+    ports:
+    - port: 4317
+      protocol: TCP
+```
+
