@@ -65,6 +65,19 @@ oc exec -n bookinfo bookinfo-gw-istio-7bb5fdc9f7-bsfwd \
   python3 -m json.tool | grep -A5 "productpage\|bookinfo"
 
 
+## config_dump ztunnel
+
+ZTUNNEL=$(oc get pods -n ztunnel -l app=ztunnel -o jsonpath='{.items[0].metadata.name}')
+
+oc port-forward -n ztunnel $ZTUNNEL 15000:15000 &
+sleep 2
+
+curl -s localhost:15000/config_dump | python3 -m json.tool | \
+  grep -E "bookinfo|waypoint|HBONE" | head -30
+
+kill %1
+
 ## check paths in httproute
 oc get httproute bookinfo-ingress -n bookinfo \
   -o jsonpath='{.spec.rules[0].matches}' | python3 -m json.tool
+

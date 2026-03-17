@@ -9,12 +9,12 @@ spec:
     pilot:
       trustedZtunnelNamespace: ztunnel
     meshConfig:
-      #enableTracing: true
+      enableTracing: true
       discoverySelectors:
       - matchLabels:
           istio-discovery: enabled
-      #extensionProviders:
-      #- name: otel
-      #  opentelemetry:
-      #    port: 4317
-      #    service: otel-collector.istio-system.svc.cluster.local
+      extensionProviders:
+      - name: otel
+        opentelemetry:
+          port: 4317
+          service: otel-collector.istio-system.svc.cluster.local
