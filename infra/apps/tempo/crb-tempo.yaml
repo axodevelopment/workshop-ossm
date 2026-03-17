@@ -1,80 +1,27 @@
-# ClusterRole for writing to tempo.grafana.com API group
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: tempo-write
-rules:
-- apiGroups: ["tempo.grafana.com"]
-  resources: ["*"]
-  verbs: ["create", "get", "list"]
----
-# Gateway tokenreviews permission
+# otel-collector SA needs cluster-admin to write traces to Tempo gateway
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: otel-collector-tempo-gateway
+  name: otel-collector-cluster-admin
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tempo-tempo-gateway-tempo
+  name: cluster-admin
 subjects:
 - kind: ServiceAccount
   name: otel-collector
   namespace: istio-system
 ---
-# TempoStack edit access
+# kiali SA needs cluster-admin to read traces from Tempo gateway
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: otel-collector-tempostack-edit
+  name: kiali-cluster-admin
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tempostacks.tempo.grafana.com-v1alpha1-edit
+  name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: otel-collector
+  name: kiali-service-account
   namespace: istio-system
----
-# Namespace-scoped write binding for OPA SSAR check
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: otel-collector-tempo-write
-  namespace: tempo
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: tempo-write
-subjects:
-- kind: ServiceAccount
-  name: otel-collector
-  namespace: istio-system
----
-# Allow all authenticated users to read traces (for Kiali)
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: tempostack-traces-reader
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: tempostacks.tempo.grafana.com-v1alpha1-view
-subjects:
-- kind: Group
-  apiGroup: rbac.authorization.k8s.io
-  name: system:authenticated
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: authenticated-tempo-read
-  namespace: tempo
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: tempostacks.tempo.grafana.com-v1alpha1-edit
-subjects:
-- kind: Group
-  apiGroup: rbac.authorization.k8s.io
-  name: system:authenticated

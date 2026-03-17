@@ -160,3 +160,11 @@ spec:
       protocol: TCP
 ```
 
+
+### cluster admin to 
+
+oc adm policy add-cluster-role-to-user cluster-admin \
+  -z kiali-service-account \
+  -n istio-system
+
+  
