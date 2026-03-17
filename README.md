@@ -114,6 +114,30 @@ oc exec -n istio-system $OTEL_POD -- iptables-save 2>/dev/null | grep -E "ISTIO|
 
 }
 
+oc get networkpolicy tempo-tempo-distributor -n tempo -o yaml | grep -A20 "ingress"
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/component: gateway
+          app.kubernetes.io/instance: tempo
+          app.kubernetes.io/managed-by: tempo-operator
+          app.kubernetes.io/name: tempo
+    ports:
+    - port: 4317
+      protocol: TCP
+    - port: 4318
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: distributor
+      app.kubernetes.io/instance: tempo
+      app.kubernetes.io/managed-by: tempo-operator
+      app.kubernetes.io/name: tempo
+  policyTypes:
+  - Egress
+
+
 networkPolicy is causing issue i'll disable that.
 
 will look at this in the future
