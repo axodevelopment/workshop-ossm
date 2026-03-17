@@ -26,17 +26,15 @@ stable-3.0	servicemeshoperator3.v3.0.8
 stable-3.1	servicemeshoperator3.v3.1.5
 stable-3.2	servicemeshoperator3.v3.2.2
 
-
-# minio
+### 
+# minio SETUP
 
 oc port-forward svc/minio 9000:9000 -n tempo &
 sleep 2
 
-# install mc if you don't have it
 curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc -o /tmp/mc
 chmod +x /tmp/mc
 
-# create the bucket
 /tmp/mc alias set minio http://localhost:9000 tempo tempo123
 /tmp/mc mb minio/tempo
 /tmp/mc ls minio

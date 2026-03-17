@@ -7,3 +7,4 @@ resources:
 - otel-collector.yaml
 - telemetry.yaml
 - crb-otel.yaml
+- otel-sa.yaml
