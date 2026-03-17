@@ -1,0 +1,30 @@
+apiVersion: kiali.io/v1alpha1
+kind: Kiali
+metadata:
+  name: kiali-user-workload-monitoring
+  namespace: istio-system
+spec:
+  external_services:
+    prometheus:
+      auth:
+        type: bearer
+        use_kiali_token: true
+      thanos_proxy:
+        enabled: true
+      url: https://thanos-querier.openshift-monitoring.svc.cluster.local:9091
+
+# only enabled check readme # get temp tracing details
+    tracing:
+      enabled: true
+      provider: tempo
+      use_grpc: false
+      internal_url: https://tempo-tempo-gateway.tempo.svc.cluster.local:8080/api/traces/v1/dev/tempo
+      external_url: https://tempo-tempo-gateway-tempo.apps.snoaxolab.axodevelopment.dev/api/traces/v1/dev/search
+      health_check_url: https://tempo-tempo-gateway-tempo.apps.snoaxolab.axodevelopment.dev/api/traces/v1/dev/tempo/api/echo
+      auth:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+        insecure_skip_verify: true
+        type: bearer
+        use_kiali_token: true
+      tempo_config:
+        url_format: "jaeger"

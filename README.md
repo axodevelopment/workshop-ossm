@@ -81,3 +81,7 @@ kill %1
 oc get httproute bookinfo-ingress -n bookinfo \
   -o jsonpath='{.spec.rules[0].matches}' | python3 -m json.tool
 
+# get temp tracing details
+
+oc get routes -n tempo
+oc get svc -n tempo | grep gateway
