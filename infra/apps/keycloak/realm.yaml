@@ -1,11 +1,15 @@
-apiVersion: keycloak.org/v1alpha1
-kind: KeycloakRealm
+#migrated from RHSSO to RHBKC
+# Not used
+
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
 metadata:
   name: workshop-realm
   namespace: keycloak
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
+  keycloakCRName: keycloak
   realm:
     realm: workshop
     enabled: true
@@ -17,8 +21,36 @@ spec:
     - name: ops
       path: /ops
 
+    users:
+    - username: dev-user
+      email: dev-user@workshop.local
+      firstName: Dev
+      lastName: User
+      enabled: true
+      emailVerified: true
+      credentials:
+      - type: password
+        value: dev-password
+        temporary: false
+      groups:
+      - /dev
+
+    - username: ops-user
+      email: ops-user@workshop.local
+      firstName: Ops
+      lastName: User
+      enabled: true
+      emailVerified: true
+      credentials:
+      - type: password
+        value: ops-password
+        temporary: false
+      groups:
+      - /ops
+
     clients:
     - clientId: bookinfo
+      name: bookinfo
       enabled: true
       protocol: openid-connect
       publicClient: false
@@ -30,6 +62,23 @@ spec:
       webOrigins:
       - "https://bookinfo.apps.snoaxolab.axodevelopment.dev"
 
-  instanceSelector:
-    matchLabels:
-      app: keycloak
+      protocolMappers:
+      - name: groups
+        protocol: openid-connect
+        protocolMapper: oidc-group-membership-mapper
+        consentRequired: false
+        config:
+          full.path: "true"
+          id.token.claim: "true"
+          access.token.claim: "true"
+          claim.name: groups
+          userinfo.token.claim: "true"
+
+      - name: audience
+        protocol: openid-connect
+        protocolMapper: oidc-audience-mapper
+        consentRequired: false
+        config:
+          included.client.audience: bookinfo
+          id.token.claim: "false"
+          access.token.claim: "true"

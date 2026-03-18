@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
 - keycloak.yaml
 - realm.yaml
-- users.yaml
