@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews-route
+  namespace: bookinfo
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    namespace: bookinfo
+  rules:
+  - backendRefs:
+    - name: reviews-v1
+      port: 9080
+      weight: 34
+    - name: reviews-v2
+      port: 9080
+      weight: 33
+    - name: reviews-v3
+      port: 9080
+      weight: 33

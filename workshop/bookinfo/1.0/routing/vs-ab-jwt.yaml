@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: reviews-ab-jwt
+  namespace: bookinfo
+spec:
+  hosts:
+  - reviews
+  http:
+
+  - match:
+    - headers:
+        "@request.auth.claims.groups":
+          exact: "/dev"
+    route:
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 100
+
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 100
