@@ -11,3 +11,5 @@ spec:
     hostname: keycloak.apps.snoaxolab.axodevelopment.dev
   http:
     httpEnabled: true
+  proxy:
+    headers: xforwarded
