@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
 - keycloak.yaml
 - realm.yaml
-- route.yaml
+#- route.yaml
