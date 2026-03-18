@@ -5,3 +5,5 @@ resources:
 - kiali-subscription.yaml
 - otel-subscription.yaml
 - tempo-subscription.yaml
+- keycloak-operatorgroup.yaml
+- keycloak-sub.yaml

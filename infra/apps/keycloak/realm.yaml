@@ -1,0 +1,35 @@
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakRealm
+metadata:
+  name: workshop-realm
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  realm:
+    realm: workshop
+    enabled: true
+    displayName: "Workshop Realm"
+
+    groups:
+    - name: dev
+      path: /dev
+    - name: ops
+      path: /ops
+
+    clients:
+    - clientId: bookinfo
+      enabled: true
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      directAccessGrantsEnabled: true
+      secret: bookinfo-client-secret
+      redirectUris:
+      - "https://bookinfo.apps.snoaxolab.axodevelopment.dev/*"
+      webOrigins:
+      - "https://bookinfo.apps.snoaxolab.axodevelopment.dev"
+
+  instanceSelector:
+    matchLabels:
+      app: keycloak

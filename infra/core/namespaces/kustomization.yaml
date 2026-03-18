@@ -6,3 +6,4 @@ resources:
 - ztunnel.yaml
 - observability.yaml
 - tempo.yaml
+- keycloak.yaml

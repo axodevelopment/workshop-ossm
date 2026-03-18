@@ -1,0 +1,55 @@
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakUser
+metadata:
+  name: dev-user
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  user:
+    username: dev-user
+    email: dev-user@workshop.local
+    firstName: Dev
+    lastName: User
+    enabled: true
+    emailVerified: true
+    credentials:
+    - type: password
+      value: dev-password
+      temporary: false
+    groups:
+    - /dev
+    realmRoles:
+    - offline_access
+    - uma_authorization
+  realmSelector:
+    matchLabels:
+      realm: workshop
+---
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakUser
+metadata:
+  name: ops-user
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  user:
+    username: ops-user
+    email: ops-user@workshop.local
+    firstName: Ops
+    lastName: User
+    enabled: true
+    emailVerified: true
+    credentials:
+    - type: password
+      value: ops-password
+      temporary: false
+    groups:
+    - /ops
+    realmRoles:
+    - offline_access
+    - uma_authorization
+  realmSelector:
+    matchLabels:
+      realm: workshop
