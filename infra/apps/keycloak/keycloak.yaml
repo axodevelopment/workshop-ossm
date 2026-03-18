@@ -11,5 +11,3 @@ spec:
     hostname: keycloak.apps.snoaxolab.axodevelopment.dev
   http:
     httpEnabled: true
-  ingress:
-    enabled: false
