@@ -20,6 +20,8 @@ spec:
       clientSecret:
         name: keycloak-openshift-secret
       issuer: https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop
+      ca:
+        name: keycloak-ca
       claims:
         preferredUsername:
         - preferred_username
