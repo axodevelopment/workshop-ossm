@@ -182,3 +182,25 @@ operator logs
 
 oc logs -n keycloak -l name=rhbk-operator --tail=30 | grep -iE "error|warn|import|realm|workshop"
 
+adding a db postgres helped but also need to clear cache for the UI to see changes
+
+
+# authorization policies
+
+jwks
+
+
+# testing jwt
+
+fetch("https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protocol/openid-connect/token", {
+  method: "POST",
+  headers: {"Content-Type": "application/x-www-form-urlencoded"},
+  body: "client_id=bookinfo&client_secret=bookinfo-client-secret&username=dev-user&password=dev-password&grant_type=password"
+})
+.then(r => r.json())
+.then(d => {
+  sessionStorage.setItem("jwt", d.access_token);
+  console.log("Token stored:", d.access_token.substring(0,50));
+});
+
+this for dev console in firefox

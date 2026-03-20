@@ -1,0 +1,125 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: workshop-realm
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  keycloakCRName: keycloak
+  realm:
+    realm: workshop
+    enabled: true
+    displayName: "Workshop Realm"
+    groups:
+    - name: dev
+      path: /dev
+    - name: ops
+      path: /ops
+
+    users:
+    - username: dev-user
+      email: dev-user@workshop.local
+      firstName: Dev
+      lastName: User
+      enabled: true
+      emailVerified: true
+      credentials:
+      - type: password
+        value: dev-password
+        temporary: false
+      groups:
+      - /dev
+
+    - username: ops-user
+      email: ops-user@workshop.local
+      firstName: Ops
+      lastName: User
+      enabled: true
+      emailVerified: true
+      credentials:
+      - type: password
+        value: ops-password
+        temporary: false
+      groups:
+      - /ops
+
+    clients:
+    - clientId: bookinfo
+      name: bookinfo
+      enabled: true
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      directAccessGrantsEnabled: true
+      secret: bookinfo-client-secret
+      redirectUris:
+      - "https://bookinfo.apps.snoaxolab.axodevelopment.dev/*"
+      webOrigins:
+      - "https://bookinfo.apps.snoaxolab.axodevelopment.dev"
+      protocolMappers:
+      - name: groups
+        protocol: openid-connect
+        protocolMapper: oidc-group-membership-mapper
+        consentRequired: false
+        config:
+          full.path: "true"
+          id.token.claim: "true"
+          access.token.claim: "true"
+          claim.name: groups
+          userinfo.token.claim: "true"
+      - name: audience
+        protocol: openid-connect
+        protocolMapper: oidc-audience-mapper
+        consentRequired: false
+        config:
+          included.client.audience: bookinfo
+          id.token.claim: "false"
+          access.token.claim: "true"
+
+    - clientId: openshift
+      name: openshift
+      enabled: true
+      protocol: openid-connect
+      publicClient: false
+      standardFlowEnabled: true
+      directAccessGrantsEnabled: false
+      secret: openshift-client-secret
+      redirectUris:
+      - "https://oauth-openshift.apps.snoaxolab.axodevelopment.dev/oauth2callback/keycloak"
+      webOrigins:
+      - "https://oauth-openshift.apps.snoaxolab.axodevelopment.dev"
+      protocolMappers:
+      
+      - name: groups
+        protocol: openid-connect
+        protocolMapper: oidc-group-membership-mapper
+        consentRequired: false
+        config:
+          full.path: "true"
+          id.token.claim: "true"
+          access.token.claim: "true"
+          claim.name: groups
+          userinfo.token.claim: "true"
+      - name: username
+        protocol: openid-connect
+        protocolMapper: oidc-usermodel-property-mapper
+        consentRequired: false
+        config:
+          userinfo.token.claim: "true"
+          user.attribute: username
+          id.token.claim: "true"
+          access.token.claim: "true"
+          claim.name: preferred_username
+          jsonType.label: String
+      - name: email
+        protocol: openid-connect
+        protocolMapper: oidc-usermodel-property-mapper
+        consentRequired: false
+        config:
+          userinfo.token.claim: "true"
+          user.attribute: email
+          id.token.claim: "true"
+          access.token.claim: "true"
+          claim.name: email
+          jsonType.label: String
