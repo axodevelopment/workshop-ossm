@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
 - bookinfo.yaml
 - bookinfo-versions.yaml
+- oidc/authpolicy.yaml
+- oidc/requestauth.yaml

@@ -1,0 +1,19 @@
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: productpage-jwt
+  namespace: bookinfo
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  targetRefs:
+  - kind: Service
+    group: ""
+    name: productpage
+
+  jwtRules:
+  - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/auth/realms/workshop"
+    jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/auth/realms/workshop/protocol/openid-connect/certs"
+    audiences:
+    - bookinfo
+    forwardOriginalToken: true 

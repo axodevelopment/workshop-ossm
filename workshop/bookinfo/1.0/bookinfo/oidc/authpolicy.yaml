@@ -1,0 +1,40 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: productpage-allow-dev
+  namespace: bookinfo
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  targetRefs:
+  - kind: Service
+    group: ""
+    name: productpage
+
+  action: ALLOW
+  rules:
+  - when:
+    - key: request.auth.claims[groups]
+      values: ["/dev"]
+    - key: request.auth.claims[realm_access.roles]
+      values: ["dev-access"]
+---
+# TODO: I don't think deny is required directly
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: productpage-deny-unauthenticated
+  namespace: bookinfo
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  targetRefs:
+  - kind: Service
+    group: ""
+    name: productpage
+
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
