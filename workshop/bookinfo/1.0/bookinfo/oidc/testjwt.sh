@@ -1,7 +1,7 @@
 #!/bin/bash
 # want to test JWT Token for the authpolicy
 
-KEYCLOAK_ROUTE=$(oc get route keycloak -n keycloak -o jsonpath='{.spec.host}')
+KEYCLOAK_ROUTE=$(oc get route -l app=keycloak -n keycloak -o jsonpath='{.items[0].spec.host}')
 echo "Keycloak: https://$KEYCLOAK_ROUTE"
 
 # dev token test
