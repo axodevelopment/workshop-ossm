@@ -12,8 +12,8 @@ spec:
     name: productpage
 
   jwtRules:
-  - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/auth/realms/workshop"
-    jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/auth/realms/workshop/protocol/openid-connect/certs"
+  - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop"
+    jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protocol/openid-connect/certs"
     audiences:
     - bookinfo
     forwardOriginalToken: true 
