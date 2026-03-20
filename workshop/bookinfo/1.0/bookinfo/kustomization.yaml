@@ -4,5 +4,5 @@ resources:
 - bookinfo.yaml
 - bookinfo-versions.yaml
 - oidc/requestauth.yaml
-- oidc/authpolicy.yaml
+#- oidc/authpolicy.yaml
 - oidc/authpolicy-allow.yaml
