@@ -29,6 +29,3 @@ spec:
         - email
         groups:
         - groups
-      extraScopes:
-      - profile
-      - email

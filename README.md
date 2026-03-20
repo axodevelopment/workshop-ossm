@@ -204,3 +204,11 @@ fetch("https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protoc
 });
 
 this for dev console in firefox
+
+# testing oauth cluster
+
+probably see errors regarding tls
+
+oc logs -n openshift-authentication-operator \
+  deployment/authentication-operator --tail=50 | grep -iE "keycloak|error|warn|oidc|provider"
+
