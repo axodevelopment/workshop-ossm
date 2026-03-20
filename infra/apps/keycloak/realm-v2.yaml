@@ -63,7 +63,7 @@ spec:
         protocolMapper: oidc-group-membership-mapper
         consentRequired: false
         config:
-          full.path: "true"
+          full.path: "false"
           id.token.claim: "true"
           access.token.claim: "true"
           claim.name: groups
@@ -96,7 +96,7 @@ spec:
         protocolMapper: oidc-group-membership-mapper
         consentRequired: false
         config:
-          full.path: "true"
+          full.path: "false"
           id.token.claim: "true"
           access.token.claim: "true"
           claim.name: groups

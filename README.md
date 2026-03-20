@@ -219,3 +219,36 @@ Map router-ca and trust keycloak-ca
 oc get secret router-ca -n openshift-ingress-operator -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/ocp-router-ca.crt
 
 oc create configmap keycloak-ca --from-file=ca.crt=/tmp/ocp-router-ca.crt -n openshift-config
+
+be sure to delete keycloakrealmimport to reimport
+
+# get admin token
+KEYCLOAK_ROUTE=$(oc get route -l app=keycloak -n keycloak -o jsonpath='{.items[0].spec.host}')
+ADMIN_PASS=$(oc get secret keycloak-initial-admin -n keycloak -o jsonpath='{.data.password}' | base64 -d)
+ADMIN_USER=$(oc get secret keycloak-initial-admin -n keycloak -o jsonpath='{.data.username}' | base64 -d)
+
+ADMIN_TOKEN=$(curl -sk \
+  -d "client_id=admin-cli" \
+  -d "username=$ADMIN_USER" \
+  -d "password=$ADMIN_PASS" \
+  -d "grant_type=password" \
+  "https://$KEYCLOAK_ROUTE/realms/master/protocol/openid-connect/token" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+echo "Token: ${ADMIN_TOKEN:0:30}..."
+
+# delete the realm
+curl -sk -X DELETE \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  "https://$KEYCLOAK_ROUTE/admin/realms/workshop"
+
+echo "Done - HTTP should return empty on success"
+
+
+oc delete keycloakrealmimport workshop-realm -n keycloak
+oc delete job -n keycloak -l app=keycloak 2>/dev/null || true
+
+---
+
+
+removeing /dev to dev and setting groups.config.full.path = false

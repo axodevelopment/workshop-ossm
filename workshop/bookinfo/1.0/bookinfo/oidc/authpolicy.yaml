@@ -12,7 +12,7 @@ spec:
   rules:
   - when:
     - key: request.auth.claims[groups]
-      values: ["/dev"]
+      values: ["dev"]
 ---
 # TODO: can prob remove
 apiVersion: security.istio.io/v1
