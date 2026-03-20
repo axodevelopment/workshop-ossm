@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
 - keycloak.yaml
 - realm.yaml
+- postgres-db.yaml
 #- route.yaml
