@@ -13,3 +13,14 @@ spec:
     httpEnabled: true
   proxy:
     headers: xforwarded
+  db:
+    vendor: postgres
+    host: postgres
+    port: 5432
+    database: keycloak
+    usernameSecret:
+      name: keycloak-db-secret
+      key: username
+    passwordSecret:
+      name: keycloak-db-secret
+      key: password

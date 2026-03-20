@@ -1,6 +1,3 @@
-#migrated from RHSSO to RHBKC
-# Not used
-
 apiVersion: k8s.keycloak.org/v2alpha1
 kind: KeycloakRealmImport
 metadata:

@@ -170,3 +170,15 @@ oc adm policy add-cluster-role-to-user cluster-admin \
 oc adm policy add-role-to-user edit $(oc whoami) \
   -n tempo \
   --role-namespace=tempo
+
+
+
+# keycloak issues with keycloakrealmimport
+# ref -> https://www.keycloak.org/operator/realm-import
+
+oc get keycloakrealmimport workshop-realm -n keycloak -o jsonpath='{.status}' | python3 -m json.tool
+
+operator logs
+
+oc logs -n keycloak -l name=rhbk-operator --tail=30 | grep -iE "error|warn|import|realm|workshop"
+
