@@ -4,4 +4,5 @@ resources:
 - keycloak.yaml
 - realm.yaml
 - postgres-db.yaml
+- db-secret.yaml
 #- route.yaml
