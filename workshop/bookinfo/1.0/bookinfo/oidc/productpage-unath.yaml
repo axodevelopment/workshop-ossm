@@ -1,0 +1,17 @@
+# TODO: For demo's this can be added to block UI access and allow app to do whatever
+# the other policy handles the api
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: productpage-deny-unauthenticated
+  namespace: bookinfo
+spec:
+  targetRefs:
+  - kind: Service
+    group: ""
+    name: productpage
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]

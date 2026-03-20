@@ -222,6 +222,13 @@ oc create configmap keycloak-ca --from-file=ca.crt=/tmp/ocp-router-ca.crt -n ope
 
 be sure to delete keycloakrealmimport to reimport
 
+# auth logs
+
+oc logs -n openshift-authentication \
+  $(oc get pods -n openshift-authentication -o jsonpath='{.items[0].metadata.name}') \
+  --tail=30 | grep -iE "error|failed|auth|callback|token|invalid"
+
+### DELETE KEYCLOAK WORKSPACE script
 # get admin token
 KEYCLOAK_ROUTE=$(oc get route -l app=keycloak -n keycloak -o jsonpath='{.items[0].spec.host}')
 ADMIN_PASS=$(oc get secret keycloak-initial-admin -n keycloak -o jsonpath='{.data.password}' | base64 -d)
@@ -247,6 +254,13 @@ echo "Done - HTTP should return empty on success"
 
 oc delete keycloakrealmimport workshop-realm -n keycloak
 oc delete job -n keycloak -l app=keycloak 2>/dev/null || true
+
+oc delete identity keycloak:1c97dba0-108a-49fd-bc5d-a0a6093b4a57 2>/dev/null || true
+oc delete identity keycloak:d1936ee6-279d-47a4-8887-fb15c7f968c5 2>/dev/null || true
+oc delete user dev-user 2>/dev/null || true
+
+
+### DELETE KEYCLOAK WORKSPACE script
 
 ---
 
