@@ -275,6 +275,8 @@ spec:
 ##################################################################################################
 # Productpage services
 ##################################################################################################
+# Editing for JWT test to include this service in the waypoint
+#
 apiVersion: v1
 kind: Service
 metadata:
@@ -282,6 +284,9 @@ metadata:
   labels:
     app: productpage
     service: productpage
+    # waypoint labels
+    istio.io/use-waypoint: bookinfo-waypoint
+    istio.io/ingress-use-waypoint: "true"
 spec:
   ports:
   - port: 9080

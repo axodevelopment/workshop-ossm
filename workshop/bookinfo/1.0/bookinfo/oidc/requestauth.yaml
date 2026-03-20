@@ -3,17 +3,14 @@ kind: RequestAuthentication
 metadata:
   name: productpage-jwt
   namespace: bookinfo
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 spec:
   targetRefs:
   - kind: Service
     group: ""
     name: productpage
-
   jwtRules:
   - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop"
     jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protocol/openid-connect/certs"
     audiences:
     - bookinfo
-    forwardOriginalToken: true 
+    forwardOriginalToken: true

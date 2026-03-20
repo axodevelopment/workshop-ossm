@@ -11,10 +11,13 @@ DEV_TOKEN=$(curl -sk \
   -d "username=dev-user" \
   -d "password=dev-password" \
   -d "grant_type=password" \
-  "https://$KEYCLOAK_ROUTE/auth/realms/workshop/protocol/openid-connect/token" \
+  "https://$KEYCLOAK_ROUTE/realms/workshop/protocol/openid-connect/token" \
   | python3 -m json.tool | grep '"access_token"' | cut -d'"' -f4)
 
+echo "Route connecting to: https://$KEYCLOAK_ROUTE/realms/workshop/protocol/openid-connect/token ..."
 echo "Dev token obtained: ${DEV_TOKEN:0:50}..."
+echo "Full dev token:"
+echo ${DEV_TOKEN}
 
 # ops toekten test
 OPS_TOKEN=$(curl -sk \
@@ -23,11 +26,15 @@ OPS_TOKEN=$(curl -sk \
   -d "username=ops-user" \
   -d "password=ops-password" \
   -d "grant_type=password" \
-  "https://$KEYCLOAK_ROUTE/auth/realms/workshop/protocol/openid-connect/token" \
+  "https://$KEYCLOAK_ROUTE/realms/workshop/protocol/openid-connect/token" \
   | python3 -m json.tool | grep '"access_token"' | cut -d'"' -f4)
 
+echo "Route connecting to: https://$KEYCLOAK_ROUTE/realms/workshop/protocol/openid-connect/token ..." 
 echo "Ops token obtained: ${OPS_TOKEN:0:50}..."
+echo "Full ops token:"
+echo ${OPS_TOKEN}
 
+# TODO: change this to qewruy bookinfo
 BOOKINFO_URL="https://bookinfo.apps.snoaxolab.axodevelopment.dev/productpage"
 
 # test 1- dev gets 200
