@@ -1,21 +1,20 @@
 apiVersion: security.istio.io/v1
-kind: RequestAuthentication
+kind: AuthorizationPolicy
 metadata:
-  name: productpage-jwt
+  name: productpage-allow-dev
   namespace: bookinfo
 spec:
   targetRefs:
   - kind: Service
     group: ""
     name: productpage
-  jwtRules:
-  - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop"
-    jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protocol/openid-connect/certs"
-    audiences:
-    - bookinfo
-    forwardOriginalToken: true
+  action: ALLOW
+  rules:
+  - when:
+    - key: request.auth.claims[groups]
+      values: ["/dev"]
 ---
-# TODO: I don't think deny is required directly
+# TODO: can prob remove
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
