@@ -1,8 +1,28 @@
+#apiVersion: security.istio.io/v1
+#kind: RequestAuthentication
+#metadata:
+#  name: productpage-jwt
+#  namespace: bookinfo
+#spec:
+#  targetRefs:
+#  - kind: Service
+#    group: ""
+#    name: productpage
+#  jwtRules:
+#  - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop"
+#    jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protocol/openid-connect/certs"
+#    audiences:
+#    - bookinfo
+#    forwardOriginalToken: true
+
+# jwks is just json at the certs url above
 apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
   name: productpage-jwt
   namespace: bookinfo
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   targetRefs:
   - kind: Service
@@ -10,7 +30,7 @@ spec:
     name: productpage
   jwtRules:
   - issuer: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop"
-    jwksUri: "https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/workshop/protocol/openid-connect/certs"
+    jwks: '{"keys":[{"kid":"BqKZc8tzRacFZBGGS9PLdFHQfVIqVrwZ6BNnU3a06XM","kty":"RSA","alg":"RS256","use":"sig","x5c":["MIICnzCCAYcCBgGdCMRkXTANBgkqhkiG9w0BAQsFADATMREwDwYDVQQDDAh3b3Jrc2hvcDAeFw0yNjAzMjAwMTAxMjFaFw0zNjAzMjAwMTAzMDFaMBMxETAPBgNVBAMMCHdvcmtzaG9wMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA22WA+zu7shgVxzv626knzMYN5GVbACjOzNZ1si2gKngvRkZK+1FyQYYU/Z3dfcY2TsPgPd6JzMRP1GtH2fnXKkAxQLAvm6pkAAt5Gqu3j4BPxORyUOmEdntu6lYjOsfMnsUCsQNipL9ObUvTcv/FIIWstsAyeNVoNir1c0u6BBF2p9jDpxAi6HllVy1UFlihwpi8PxXJA+pC2nhI1UYl2QAFNZiSFn9+HSncLGNPWNHXMNeJ0RB9fydz3v81B5QJoRQOumNPbsiWnVFW/WzMfW8ZZrnzUpJVyhjjQTwu1ipmQFMlddoy/s2j2G5ZxjC46uzElvLbdnjkFn3UO+8JhQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBSTPMqh1HEgbrMYuVXGT94hmEFTRsUpkg5+8HOjzLLZcyEl+kFEcwx+Tlh9Ks2CZocf9iIuuM6uP5L4f9QYGmqTi1XBBj1DdXpJM2veemJVA2Rz9m/X2w7xVnjZvIvuo9slVTddoCF100Gy3Y5/hwFRlnYISQqtoa6YsOvCxkavn28nwQrjlc0dOEkJ0cJhDXP2G6wRnqRI9DMF+GsqVPt4Glc9K3HuFhLC8FFUJ6vxWpciAuH9CX9tAFdXgeKPmPBTZLAJq3SMWSrbaWuXPPRTaw/k6kN9sLAeOffhVAJjdSO7Sj8/SIhsb1VMYJYm7qCCpJFv68G9J+dkFD3Db4L"],"x5t":"y0tTv2ihNSxiFP_T2Vo86rV_Ctc","x5t#S256":"p1GEbYiFMwoe_OfpGO1mQnX6bcJF870v-BLCOFhFWJI","n":"22WA-zu7shgVxzv626knzMYN5GVbACjOzNZ1si2gKngvRkZK-1FyQYYU_Z3dfcY2TsPgPd6JzMRP1GtH2fnXKkAxQLAvm6pkAAt5Gqu3j4BPxORyUOmEdntu6lYjOsfMnsUCsQNipL9ObUvTcv_FIIWstsAyeNVoNir1c0u6BBF2p9jDpxAi6HllVy1UFlihwpi8PxXJA-pC2nhI1UYl2QAFNZiSFn9-HSncLGNPWNHXMNeJ0RB9fydz3v81B5QJoRQOumNPbsiWnVFW_WzMfW8ZZrnzUpJVyhjjQTwu1ipmQFMlddoy_s2j2G5ZxjC46uzElvLbdnjkFn3UO-8JhQ","e":"AQAB"},{"kid":"_w9XrBQ1w_8ILmTgiZQ0_-iXp6Wj6qm7LYsZDylAYEc","kty":"RSA","alg":"RSA-OAEP","use":"enc","x5c":["MIICnzCCAYcCBgGdCMRmODANBgkqhkiG9w0BAQsFADATMREwDwYDVQQDDAh3b3Jrc2hvcDAeFw0yNjAzMjAwMTAxMjJaFw0zNjAzMjAwMTAzMDJaMBMxETAPBgNVBAMMCHdvcmtzaG9wMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArp8Q+3mWB2iTOO2ZqV9aWFTSBThG2qI6s0Vzlil3VztN2Pz8ydsGtxlO1dLjOvw5zAfPGMawkWsuZ2djzDKNZkS5+Ngn9yrT9rOoud12nC106EMcJ5gcy+N+GSMWH1W2ApLtV8U1wIU5n1Ne01MBXqwtFBzNuX2/Zhw+SxUmExPRlYErgbczhEtsCi23WCF66QwG7XapKrkyt52aaWjQpTOa9rR3GV6Sx8TCXrzEAmKK40Aq5efo8RMshmeFD1xUX7YZGnzO9ZuOn1Ygi9QxDpAGaG2i4e+bcZIQf8pksTFZiq6mXlzyZNvd/i4dkpxqZqu6oM7qUlJmkW4lKkINcQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBiKAD7k2Mciq2/E4cHcgEluq4gPeW0beT/qEXyJPVLdCq4ChzpQzvCfZV82l+UbwHybPhyAf9X1uP0m+9Id/VAfIFnopmiJGVYWdQLvhLVjPhJ+508+qAW5JoMKZagZmOkigPG3QCJNsD5i5xAoeLE2F3DohUYN9Y6rwCvGyY0S1GGGnHiIeauCgcNhge4QxnrHM52hJvc3GiFra931BXpAU2sWISKDi7j6h+F+cEQJreivpF51G9+0xE5sieNXd4S7R6aV48409oDvG+UHv6IBlWW/euDlrQT7I7bJ+y8lP/zXfmXENtHMBnPQUmr97p7T6o4Oh5Z8YijW7SwPF6n"],"x5t":"kOXpt2rtpzc-N-Qw0kN06ddRGwo","x5t#S256":"JgqdYlMedga2lKD2sH-ga1GWurbWWoHV6mQQLlCLHNY","n":"rp8Q-3mWB2iTOO2ZqV9aWFTSBThG2qI6s0Vzlil3VztN2Pz8ydsGtxlO1dLjOvw5zAfPGMawkWsuZ2djzDKNZkS5-Ngn9yrT9rOoud12nC106EMcJ5gcy-N-GSMWH1W2ApLtV8U1wIU5n1Ne01MBXqwtFBzNuX2_Zhw-SxUmExPRlYErgbczhEtsCi23WCF66QwG7XapKrkyt52aaWjQpTOa9rR3GV6Sx8TCXrzEAmKK40Aq5efo8RMshmeFD1xUX7YZGnzO9ZuOn1Ygi9QxDpAGaG2i4e-bcZIQf8pksTFZiq6mXlzyZNvd_i4dkpxqZqu6oM7qUlJmkW4lKkINcQ","e":"AQAB"}]}'
     audiences:
     - bookinfo
     forwardOriginalToken: true
