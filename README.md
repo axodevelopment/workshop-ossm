@@ -1,5 +1,14 @@
+
+
 # workshop-ossm
 
+# TODO: Current needs.
+
+KubeletConfig to increase pod limit to 500 (currently hitting 250 limit)
+Scope down otel-collector and kiali cluster-admin to minimal RBAC
+Replace inline jwks with proper CA trust for jwksUri
+MinIO bucket creation Job reliability
+Tempo gossip ring issues when in ambient mesh
 
 # pre reqs
 
@@ -266,3 +275,24 @@ oc delete user dev-user 2>/dev/null || true
 
 
 removeing /dev to dev and setting groups.config.full.path = false
+
+
+# DRAFT - Lessons learned so far
+
+openshift-operators already has global-operators OperatorGroup — never add another
+
+OCP monitoring ignores namespaceSelector in PodMonitors — deploy in same namespace as pods
+
+Tempo outside the mesh (no istio labels) — complex gossip breaks with HBONE
+
+otel-collector has ambient.istio.io/redirection: disabled
+
+otel-collector and kiali-service-account both have cluster-admin (TODO: scope down)
+
+RHBK KeycloakRealmImport is one-shot — must delete realm via API to re-import
+
+jwksUri doesn't work with self-signed OCP router cert — using inline jwks
+
+AuthorizationPolicy ALLOW creates implicit deny for non-matching requests
+
+Gateway API HTTPRoute and VirtualService conflict on same service — pick one
