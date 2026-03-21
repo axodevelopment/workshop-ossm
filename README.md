@@ -4,6 +4,7 @@
 
 # TODO: Current needs.
 
+KeycloakRealmImport should be deleted after they are first ran per docs
 KubeletConfig to increase pod limit to 500 (currently hitting 250 limit)
 Scope down otel-collector and kiali cluster-admin to minimal RBAC
 Replace inline jwks with proper CA trust for jwksUri

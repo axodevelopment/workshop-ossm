@@ -6,6 +6,9 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
+  #ingress:
+  #  className: openshift-default
+  #  tlsSecret: example-tls-secret
   instances: 1
   hostname:
     hostname: keycloak.apps.snoaxolab.axodevelopment.dev
@@ -24,3 +27,10 @@ spec:
     passwordSecret:
       name: keycloak-db-secret
       key: password
+  #tracing:
+  #  enabled: true
+  #  endpoint: http://...:4317
+  #  samplerType: parentbased_traceidratio
+  #  samplerRatio: 0.01
+  #  resourceAttributes:
+  #    some.attribute: something
