@@ -8,3 +8,4 @@ resources:
 - tempo.yaml
 - keycloak.yaml
 - rhdh.yaml
+- rhdh-operator.yaml

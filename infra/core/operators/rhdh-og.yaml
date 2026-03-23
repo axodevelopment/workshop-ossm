@@ -2,7 +2,5 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: rhdh-operator-group
-  namespace: rhdh
-spec:
-  targetNamespaces:
-    - rhdh
+  namespace: rhdh-operator
+spec: {}
