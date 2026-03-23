@@ -20,6 +20,7 @@ spec:
       serviceAccountName: gitea
       securityContext:
         fsGroup: 1000
+
       initContainers:
         - name: fix-permissions
           image: registry.access.redhat.com/ubi9/ubi-minimal:latest
@@ -28,13 +29,13 @@ spec:
             - -c
             - |
               chown -R 1000:1000 /data
-              chmod -R 750 /data
               echo "Permissions fixed."
           volumeMounts:
             - name: data
               mountPath: /data
           securityContext:
-            runAsUser: 0   
+            runAsUser: 0
+
         - name: wait-for-postgres
           image: registry.redhat.io/rhel9/postgresql-15:latest
           command:
@@ -59,6 +60,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+
       containers:
         - name: gitea
           image: gitea/gitea:1.22.3
@@ -114,12 +116,7 @@ spec:
             limits:
               cpu: 1000m
               memory: 1Gi
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsUser: 1000
-            runAsGroup: 1000
-            capabilities:
-              drop: ["ALL"]
+          securityContext: {}
       volumes:
         - name: data
           persistentVolumeClaim:

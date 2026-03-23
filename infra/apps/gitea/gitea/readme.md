@@ -138,3 +138,9 @@ Replace before real use. For workshop purposes they are safe to commit as-is.
 | `gitea/gitea/secret-app.yaml` | `JWT_SECRET` | `openssl rand -hex 32` |
 
 ---
+
+###  gitea pvc
+
+oc delete pvc gitea-data -n gitea
+
+May need to routinely delete pvc until i get this stabalized
