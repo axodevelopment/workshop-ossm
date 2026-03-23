@@ -4,3 +4,5 @@ resources:
 - redis/service.yaml
 - redis/pvc.yaml
 - redis/service.yaml
+- postgres/service.yaml
+- postgres/statefulset.yaml
