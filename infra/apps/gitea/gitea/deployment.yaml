@@ -18,7 +18,8 @@ spec:
         app: gitea
     spec:
       serviceAccountName: gitea
-      securityContext: {}
+      securityContext:
+        fsGroup: 1000
 
       initContainers:
         - name: wait-for-postgres
@@ -27,12 +28,16 @@ spec:
             - /bin/sh
             - -c
             - |
-              until pg_isready -h gitea-postgresql.gitea.svc.cluster.local -p 5432 -U $POSTGRES_USER; do
+              until pg_isready \
+                -h gitea-postgresql.gitea.svc.cluster.local \
+                -p 5432 \
+                -U $(POSTGRESQL_USER); do
                 echo "Waiting for PostgreSQL..."
                 sleep 3
               done
+              echo "PostgreSQL is ready."
           env:
-            - name: POSTGRES_USER
+            - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
                   name: gitea-postgres-secret
@@ -50,18 +55,33 @@ spec:
               name: http
             - containerPort: 22
               name: ssh
+          envFrom:
+            - configMapRef:
+                name: gitea-config
           env:
             - name: GITEA__database__PASSWD
               valueFrom:
                 secretKeyRef:
                   name: gitea-postgres-secret
                   key: POSTGRES_PASSWORD
+            - name: GITEA__security__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-app-secret
+                  key: SECRET_KEY
+            - name: GITEA__security__INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-app-secret
+                  key: INTERNAL_TOKEN
+            - name: GITEA__oauth2__JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-app-secret
+                  key: JWT_SECRET
           volumeMounts:
             - name: data
               mountPath: /data
-            - name: config
-              mountPath: /data/gitea/conf/app.ini
-              subPath: app.ini
           readinessProbe:
             httpGet:
               path: /api/healthz
@@ -86,11 +106,9 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+              add: ["SETGID", "SETUID"]
 
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: gitea-data
-        - name: config
-          configMap:
-            name: gitea-config

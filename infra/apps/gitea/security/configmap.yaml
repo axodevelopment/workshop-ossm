@@ -6,58 +6,27 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 data:
-  app.ini: |
-    APP_NAME = Gitea — snoaxolab Workshop
-    RUN_MODE = prod
-
-    [server]
-    DOMAIN           = gitea.apps.snoaxolab.axodevelopment.dev
-    ROOT_URL         = https://gitea.apps.snoaxolab.axodevelopment.dev/
-    HTTP_PORT        = 3000
-    START_SSH_SERVER = false
-    LFS_START_SERVER = true
-    LFS_CONTENT_PATH = /data/gitea/lfs
-
-    [database]
-    DB_TYPE  = postgres
-    HOST     = gitea-postgresql.gitea.svc.cluster.local:5432
-    NAME     = gitea
-    USER     = gitea
-    PASSWD   = _env:GITEA__database__PASSWD
-    SSL_MODE = disable
-
-    [repository]
-    ROOT = /data/gitea/repositories
-
-    [security]
-    INSTALL_LOCK        = true
-    SECRET_KEY          = _env:GITEA__security__SECRET_KEY
-    INTERNAL_TOKEN      = _env:GITEA__security__INTERNAL_TOKEN
-    PASSWORD_COMPLEXITY = off
-
-    [oauth2]
-    JWT_SECRET = _env:GITEA__oauth2__JWT_SECRET
-
-    [service]
-    DISABLE_REGISTRATION              = false
-    REQUIRE_SIGNIN_VIEW               = false
-    REGISTER_EMAIL_CONFIRM            = false
-    ENABLE_NOTIFY_MAIL                = false
-    NO_REPLY_ADDRESS                  = noreply@gitea.apps.snoaxolab.axodevelopment.dev
-
-    [mailer]
-    ENABLED = false
-
-    [cache]
-    ADAPTER = memory
-
-    [session]
-    PROVIDER = memory
-
-    [log]
-    MODE      = console
-    LEVEL     = info
-    ROOT_PATH = /data/gitea/log
-
-    [webhook]
-    ALLOWED_HOST_LIST = *
+  GITEA__server__DOMAIN: "gitea.apps.snoaxolab.axodevelopment.dev"
+  GITEA__server__ROOT_URL: "https://gitea.apps.snoaxolab.axodevelopment.dev/"
+  GITEA__server__HTTP_PORT: "3000"
+  GITEA__server__START_SSH_SERVER: "false"
+  GITEA__server__LFS_START_SERVER: "true"
+  GITEA__database__DB_TYPE: "postgres"
+  GITEA__database__HOST: "gitea-postgresql.gitea.svc.cluster.local:5432"
+  GITEA__database__NAME: "gitea"
+  GITEA__database__USER: "gitea"
+  GITEA__database__SSL_MODE: "disable"
+  GITEA__repository__ROOT: "/data/gitea/repositories"
+  GITEA__security__INSTALL_LOCK: "true"
+  GITEA__security__PASSWORD_COMPLEXITY: "off"
+  GITEA__service__DISABLE_REGISTRATION: "false"
+  GITEA__service__REQUIRE_SIGNIN_VIEW: "false"
+  GITEA__service__REGISTER_EMAIL_CONFIRM: "false"
+  GITEA__service__ENABLE_NOTIFY_MAIL: "false"
+  GITEA__mailer__ENABLED: "false"
+  GITEA__cache__ADAPTER: "memory"
+  GITEA__session__PROVIDER: "memory"
+  GITEA__log__MODE: "console"
+  GITEA__log__LEVEL: "info"
+  GITEA__webhook__ALLOWED_HOST_LIST: "*"
+  GITEA__APP_NAME: "Gitea - snoaxolab Workshop"
