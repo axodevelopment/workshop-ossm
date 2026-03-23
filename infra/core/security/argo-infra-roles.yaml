@@ -34,7 +34,7 @@ rules:
   resources: ["services", "endpoints", "serviceaccounts", "configmaps", "namespaces"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["apps"]
-  resources: ["deployments", "replicasets", "daemonsets"]
+  resources: ["deployments", "replicasets", "daemonsets", "statefulsets"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["route.openshift.io"]
   resources: ["routes", "routes/custom-host"]
