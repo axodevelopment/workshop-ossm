@@ -7,3 +7,5 @@ resources:
 - tempo-subscription.yaml
 - keycloak-operatorgroup.yaml
 - keycloak-sub.yaml
+- rhdh-og.yaml
+- rhdh-subscription.yaml
