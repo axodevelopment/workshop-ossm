@@ -7,3 +7,4 @@ resources:
 - observability.yaml
 - tempo.yaml
 - keycloak.yaml
+- rhdh.yaml
