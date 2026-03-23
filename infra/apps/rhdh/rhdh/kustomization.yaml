@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- dynamic-plugins-rhdh.yaml
+- rhdh-app-config.yaml
+- keycloakrealm.yaml
+- backstage.yaml

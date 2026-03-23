@@ -1,0 +1,59 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: rhdh-realm
+  namespace: keycloak
+spec:
+  keycloakCRName: keycloak
+  realm:
+    realm: rhdh
+    enabled: true
+    displayName: Red Hat Developer Hub
+    sslRequired: external
+    registrationAllowed: false
+    internationalizationEnabled: false
+    clients:
+      - clientId: rhdh
+        name: Red Hat Developer Hub
+        enabled: true
+        protocol: openid-connect
+        publicClient: false
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        secret: <same-value-as-KEYCLOAK_CLIENT_SECRET>
+        redirectUris:
+          - "https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev/*"
+        webOrigins:
+          - "https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev"
+        defaultClientScopes:
+          - openid
+          - profile
+          - email
+        optionalClientScopes:
+          - groups
+    roles:
+      realm:
+        - name: rhdh-admin
+          description: RHDH policy administrator
+        - name: rhdh-user
+          description: Standard RHDH user
+    groups:
+      - name: rhdh-admins
+        realmRoles:
+          - rhdh-admin
+      - name: rhdh-users
+        realmRoles:
+          - rhdh-user
+    users:
+      - username: rhdh-admin
+        enabled: true
+        email: rhdh-admin@example.com
+        firstName: RHDH
+        lastName: Admin
+        credentials:
+          - type: password
+            value: ChangeMe123!
+            temporary: true
+        groups:
+          - rhdh-admins
