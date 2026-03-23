@@ -141,6 +141,10 @@ Replace before real use. For workshop purposes they are safe to commit as-is.
 
 ###  gitea pvc
 
+oc scale deployment gitea -n gitea --replicas=0
 oc delete pvc gitea-data -n gitea
 
+then refresh
+
 May need to routinely delete pvc until i get this stabalized
+

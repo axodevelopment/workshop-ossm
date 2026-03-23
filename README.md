@@ -8,6 +8,7 @@
 Test GITEA admin init
 Integrate RHDB dependencies Postgres
 Integrate RHDB dependencies Redis
+Integrate RHDB dep gitea
 KeycloakRealmImport should be deleted after they are first ran per docs
 Keycloak service monitor setup
 KubeletConfig to increase pod limit to 500 (currently hitting 250 limit)
