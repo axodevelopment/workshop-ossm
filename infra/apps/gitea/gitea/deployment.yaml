@@ -19,11 +19,7 @@ spec:
     spec:
       serviceAccountName: gitea
       securityContext:
-        allowPrivilegeEscalation: false
-        runAsUser: 1000
-        runAsGroup: 1000
-        capabilities:
-          drop: ["ALL"]  
+        fsGroup: 1000
       initContainers:
         - name: wait-for-postgres
           image: registry.redhat.io/rhel9/postgresql-15:latest
@@ -49,7 +45,6 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-
       containers:
         - name: gitea
           image: gitea/gitea:1.22.3
@@ -107,10 +102,10 @@ spec:
               memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
+            runAsUser: 1000
+            runAsGroup: 1000
             capabilities:
               drop: ["ALL"]
-              add: ["SETGID", "SETUID"]
-
       volumes:
         - name: data
           persistentVolumeClaim:
