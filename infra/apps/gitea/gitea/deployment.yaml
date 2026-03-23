@@ -17,9 +17,9 @@ spec:
       labels:
         app: gitea
     spec:
+      serviceAccountName: gitea
       securityContext:
         runAsNonRoot: true
-        fsGroup: 1000
 
       initContainers:
         # Wait for PostgreSQL to be ready before Gitea starts

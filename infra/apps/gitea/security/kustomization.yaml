@@ -5,3 +5,5 @@ resources:
 - gitea-postgres-secret.yaml
 - secret-admin.yaml
 - secret-app.yaml
+- sa.yaml
+- crb-gitea.yaml
