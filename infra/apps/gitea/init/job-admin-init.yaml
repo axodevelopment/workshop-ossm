@@ -1,0 +1,163 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gitea-admin-init
+  namespace: gitea
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              GITEA_URL="http://gitea.gitea.svc.cluster.local:3000"
+
+              echo "=== Waiting for Gitea to be ready... ==="
+              until curl -sf "${GITEA_URL}/api/healthz" > /dev/null; do
+                echo "  not ready yet, sleeping 5s..."
+                sleep 5
+              done
+              echo "=== Gitea is ready ==="
+
+              echo ""
+              echo "=== Creating admin user: ${GITEA_ADMIN_USER} ==="
+              HTTP_STATUS=$(curl -s -o /tmp/create_user_resp.json -w "%{http_code}" \
+                -X POST "${GITEA_URL}/api/v1/admin/users" \
+                -H "Content-Type: application/json" \
+                -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" \
+                -d "{
+                  \"email\": \"${GITEA_ADMIN_EMAIL}\",
+                  \"full_name\": \"Gitea Admin\",
+                  \"login_name\": \"${GITEA_ADMIN_USER}\",
+                  \"must_change_password\": false,
+                  \"password\": \"${GITEA_ADMIN_PASSWORD}\",
+                  \"send_notify\": false,
+                  \"source_id\": 0,
+                  \"username\": \"${GITEA_ADMIN_USER}\"
+                }")
+
+              if [ "$HTTP_STATUS" = "201" ]; then
+                echo "  Admin user created successfully."
+              elif [ "$HTTP_STATUS" = "422" ]; then
+                echo "  Admin user already exists, continuing."
+              else
+                echo "  ERROR: Failed to create admin user (HTTP $HTTP_STATUS)"
+                cat /tmp/create_user_resp.json
+                exit 1
+              fi
+
+              echo ""
+              echo "=== Creating 'workshop' organisation ==="
+              HTTP_STATUS=$(curl -s -o /tmp/create_org_resp.json -w "%{http_code}" \
+                -X POST "${GITEA_URL}/api/v1/orgs" \
+                -H "Content-Type: application/json" \
+                -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" \
+                -d '{
+                  "username": "workshop",
+                  "visibility": "public",
+                  "repo_admin_change_team_access": true
+                }')
+
+              if [ "$HTTP_STATUS" = "201" ]; then
+                echo "  Organisation 'workshop' created."
+              elif [ "$HTTP_STATUS" = "422" ]; then
+                echo "  Organisation 'workshop' already exists, continuing."
+              else
+                echo "  ERROR: Failed to create organisation (HTTP $HTTP_STATUS)"
+                cat /tmp/create_org_resp.json
+                exit 1
+              fi
+
+              echo ""
+              echo "=== Creating RHDH catalog token ==="
+              # Delete existing token of same name first to make this idempotent
+              curl -s -o /dev/null \
+                -X DELETE "${GITEA_URL}/api/v1/users/${GITEA_ADMIN_USER}/tokens/rhdh-catalog-token" \
+                -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" || true
+
+              HTTP_STATUS=$(curl -s -o /tmp/create_token_resp.json -w "%{http_code}" \
+                -X POST "${GITEA_URL}/api/v1/users/${GITEA_ADMIN_USER}/tokens" \
+                -H "Content-Type: application/json" \
+                -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" \
+                -d '{"name": "rhdh-catalog-token"}')
+
+              if [ "$HTTP_STATUS" = "201" ]; then
+                TOKEN=$(cat /tmp/create_token_resp.json | grep -o '"sha1":"[^"]*"' | cut -d'"' -f4)
+                echo ""
+                echo "================================================================"
+                echo "  TOKEN CREATED SUCCESSFULLY — COPY THIS VALUE NOW"
+                echo "  You have 10 minutes before this job is cleaned up."
+                echo ""
+                echo "  GITEA_TOKEN=${TOKEN}"
+                echo ""
+                echo "  Patch it into the RHDH secret:"
+                echo "    oc patch secret my-rhdh-secrets -n rhdh \\"
+                echo "      --type=merge \\"
+                echo "      -p '{\"stringData\":{\"GITEA_TOKEN\":\"${TOKEN}\"}}'"
+                echo ""
+                echo "  Then restart RHDH:"
+                echo "    oc rollout restart deployment/backstage-rhdh -n rhdh"
+                echo "================================================================"
+              else
+                echo "  ERROR: Failed to create token (HTTP $HTTP_STATUS)"
+                cat /tmp/create_token_resp.json
+                exit 1
+              fi
+
+              echo ""
+              echo "=== Seeding example catalog repository ==="
+              HTTP_STATUS=$(curl -s -o /tmp/create_repo_resp.json -w "%{http_code}" \
+                -X POST "${GITEA_URL}/api/v1/orgs/workshop/repos" \
+                -H "Content-Type: application/json" \
+                -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" \
+                -d '{
+                  "name": "catalog",
+                  "description": "RHDH Software Catalog",
+                  "private": false,
+                  "auto_init": true,
+                  "default_branch": "main"
+                }')
+
+              if [ "$HTTP_STATUS" = "201" ]; then
+                echo "  Repository 'workshop/catalog' created."
+              elif [ "$HTTP_STATUS" = "409" ]; then
+                echo "  Repository already exists, continuing."
+              else
+                echo "  WARNING: Failed to create catalog repo (HTTP $HTTP_STATUS) — non-fatal"
+                cat /tmp/create_repo_resp.json
+              fi
+
+              echo ""
+              echo "=== Init job complete ==="
+          env:
+            - name: GITEA_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-admin-secret
+                  key: GITEA_ADMIN_USER
+            - name: GITEA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-admin-secret
+                  key: GITEA_ADMIN_PASSWORD
+            - name: GITEA_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-admin-secret
+                  key: GITEA_ADMIN_EMAIL
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      securityContext:
+        runAsNonRoot: true

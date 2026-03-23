@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea
+  namespace: gitea
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  strategy:
+    type: Recreate           # single PVC — avoid two pods fighting over /data
+  template:
+    metadata:
+      labels:
+        app: gitea
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+
+      initContainers:
+        # Wait for PostgreSQL to be ready before Gitea starts
+        - name: wait-for-postgres
+          image: registry.redhat.io/rhel9/postgresql-15:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until pg_isready -h gitea-postgresql.gitea.svc.cluster.local -p 5432 -U $POSTGRES_USER; do
+                echo "Waiting for PostgreSQL..."
+                sleep 3
+              done
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-postgres-secret
+                  key: POSTGRES_USER
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+
+      containers:
+        - name: gitea
+          image: gitea/gitea:1.22.3
+          ports:
+            - containerPort: 3000
+              name: http
+            - containerPort: 22
+              name: ssh
+          env:
+            - name: GITEA__database__PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-postgres-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /data/gitea/conf/app.ini
+              subPath: app.ini
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitea-data
+        - name: config
+          configMap:
+            name: gitea-config

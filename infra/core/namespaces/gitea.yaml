@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitea
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    openshift.io/user-monitoring: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"    
