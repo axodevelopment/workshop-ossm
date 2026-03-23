@@ -11,6 +11,6 @@ spec:
     dynamicPluginsConfigMapName: dynamic-plugins-rhdh
     extraEnvs:
       secrets:
-        - name: my-rhdh-secrets
+        - name: rhdh-secrets
   database:
     enableLocalDb: false
