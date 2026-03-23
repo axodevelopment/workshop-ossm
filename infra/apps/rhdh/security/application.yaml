@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rhdh
+  name: rhdh-security
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "-3"
+    argocd.argoproj.io/sync-wave: "-5"
   labels:
     dependency: observability
   finalizers:
@@ -14,7 +14,7 @@ spec:
   source:
     repoURL: https://github.com/axodevelopment/workshop-ossm
     targetRevision: main
-    path: infra/apps/rhdh
+    path: infra/apps/rhdh/security
   destination:
     server: https://kubernetes.default.svc
     namespace: rhdh

@@ -23,12 +23,12 @@ spec:
             - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: my-rhdh-secrets
+                  name: rhdh-secrets
                   key: POSTGRES_USER
             - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: my-rhdh-secrets
+                  name: rhdh-secrets
                   key: POSTGRES_PASSWORD
             - name: POSTGRESQL_DATABASE
               value: backstage
