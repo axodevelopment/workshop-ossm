@@ -12,22 +12,19 @@ data:
 
     plugins:
       # ── RBAC ──────────────────────────────────────────────────────────────
-      # Package ref comes from dynamic-plugins.default.yaml — just flip disabled
-      - package: './dynamic-plugins/dist/backstage-community-plugin-rbac'
+      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-community-plugin-rbac'
         disabled: false
 
       # ── OIDC auth backend ─────────────────────────────────────────────────
-      - package: './dynamic-plugins/dist/backstage-plugin-auth-backend-module-oidc-provider'
+      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-plugin-auth-backend-module-oidc-provider'
         disabled: false
 
-      # ── Gitea scaffolder (OCI — external, not in default yaml) ────────────
+      # ── TechDocs ──────────────────────────────────────────────────────────
+      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-plugin-techdocs'
+        disabled: false
+      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-plugin-techdocs-backend'
+        disabled: false
+
+      # ── Gitea scaffolder (external OCI) ───────────────────────────────────
       - package: 'oci://quay.io/na-east-launch/scaffolder-backend-module-gitea@sha256:e6ad69865b439c54d90876058db8284998789aa723c4eb39ba185a1e0f66469f!backstage-plugin-scaffolder-backend-module-gitea'
         disabled: false
-
-      # ── TechDocs + TechDocs backend ───────────────────────────────────────
-      # TODO: Commented out until we confirm correct package identifiers from
-      # dynamic-plugins.default.yaml — local paths don't seem to exist in RHDH 1.9
-      # - package: './dynamic-plugins/dist/backstage-plugin-techdocs'
-      #   disabled: false
-      # - package: './dynamic-plugins/dist/backstage-plugin-techdocs-backend'
-      #   disabled: false
