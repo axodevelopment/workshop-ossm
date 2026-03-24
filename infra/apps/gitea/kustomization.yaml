@@ -7,4 +7,5 @@ resources:
 - gitea/service.yaml
 - gitea/route.yaml
 - gitea/pvc.yaml
+- init/sa-init.yaml
 - init/job-admin-init.yaml
