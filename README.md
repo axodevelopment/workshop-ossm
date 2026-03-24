@@ -329,3 +329,51 @@ oc exec -n rhdh statefulset/postgresql -- \
 Forgot admin password...
 
 
+
+
+
+
+
+# KEYCLOAK TOOLING
+
+### delete workshop realm
+
+KEYCLOAK_ROUTE=$(oc get route -l app=keycloak -n keycloak -o jsonpath='{.items[0].spec.host}')
+ADMIN_PASS=$(oc get secret keycloak-initial-admin -n keycloak -o jsonpath='{.data.password}' | base64 -d)
+ADMIN_USER=$(oc get secret keycloak-initial-admin -n keycloak -o jsonpath='{.data.username}' | base64 -d)
+
+ADMIN_TOKEN=$(curl -sk \
+  -d "client_id=admin-cli" \
+  -d "username=$ADMIN_USER" \
+  -d "password=$ADMIN_PASS" \
+  -d "grant_type=password" \
+  "https://$KEYCLOAK_ROUTE/realms/master/protocol/openid-connect/token" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+echo "Token: ${ADMIN_TOKEN:0:30}..."
+
+# delete the realm
+curl -sk -X DELETE \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  "https://$KEYCLOAK_ROUTE/admin/realms/workshop"
+
+
+
+### delete rhdh realm
+KEYCLOAK_ROUTE=$(oc get route -l app=keycloak -n keycloak -o jsonpath='{.items[0].spec.host}')
+ADMIN_PASS=$(oc get secret keycloak-initial-admin -n keycloak \
+  -o jsonpath='{.data.password}' | base64 -d)
+
+TOKEN=$(curl -s -X POST \
+  "${KEYCLOAK_ROUTE}/realms/master/protocol/openid-connect/token" \
+  -d "client_id=admin-cli&grant_type=password&username=admin&password=${ADMIN_PASS}" \
+  | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+
+# Delete the realm
+curl -s -X DELETE "${KEYCLOAK_ROUTE}/admin/realms/rhdh" \
+  -H "Authorization: Bearer ${TOKEN}"
+
+# Delete the CR and re-apply
+oc delete keycloakrealmimport rhdh-realm -n keycloak
+oc apply -f infra/apps/rhdh/rhdh/keycloakrealm.yaml
+

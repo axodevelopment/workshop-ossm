@@ -11,14 +11,18 @@ data:
       - dynamic-plugins.default.yaml
 
     plugins:
-      # ── RBAC ──────────────────────────────────────────────────────────────
+      # ── RBAC ─────────────────────────────────────────────────────────
       - package: 'oci://quay.io/rhdh/backstage-community-plugin-rbac:1.9.0--1.45.1!backstage-community-plugin-rbac'
         disabled: false
 
-      # ── TechDocs frontend ─────────────────────────────────────────────────
+      # ── TechDocs frontend 
       - package: 'oci://quay.io/rhdh/backstage-plugin-techdocs:1.9.0--1.14.1!backstage-plugin-techdocs'
         disabled: false
 
-      # ── Gitea scaffolder (external OCI) ───────────────────────────────────
+      # ── Gitea scaffolder (external OCI) ──────────
       - package: 'oci://quay.io/na-east-launch/scaffolder-backend-module-gitea@sha256:e6ad69865b439c54d90876058db8284998789aa723c4eb39ba185a1e0f66469f!backstage-plugin-scaffolder-backend-module-gitea'
+        disabled: false
+      
+      # ── Keycloak catalog provider ─────────────────────
+      - package: './dynamic-plugins/dist/backstage-community-plugin-catalog-backend-module-keycloak-dynamic'
         disabled: false

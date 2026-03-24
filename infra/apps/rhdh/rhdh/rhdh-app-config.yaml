@@ -35,16 +35,20 @@ data:
     auth:
       environment: production
       session:
-        secret: ${KEYCLOAK_CLIENT_SECRET}
+        secret: ${SESSION_SECRET}
       providers:
         oidc:
           production:
-            metadataUrl: >-
-              https://keycloak.apps.snoaxolab.axodevelopment.dev/realms/rhdh/.well-known/openid-configuration
+            metadataUrl: ${KEYCLOAK_BASE_URL}/.well-known/openid-configuration
             clientId: ${KEYCLOAK_CLIENT_ID}
             clientSecret: ${KEYCLOAK_CLIENT_SECRET}
             prompt: auto
-      dangerouslyAllowSignInWithoutUserInCatalog: true
+            dangerouslyAllowSignInWithoutUserInCatalog: true
+            signIn:
+              resolvers:
+                - resolver: preferredUsernameMatchingUserEntityName
+                - resolver: emailMatchingUserEntityProfileEmail
+                - resolver: emailLocalPartMatchingUserEntityName
 
     signInPage: oidc
 
@@ -65,8 +69,23 @@ data:
             - Template
             - User
             - Group
+      providers:
+        keycloakOrg:
+          default:
+            baseUrl: ${KEYCLOAK_BASE_URL}
+            clientId: ${KEYCLOAK_CLIENT_ID}
+            clientSecret: ${KEYCLOAK_CLIENT_SECRET}
+            realm: ${KEYCLOAK_REALM}
+            loginRealm: ${KEYCLOAK_LOGIN_REALM}
+            userQuerySize: 100
+            groupQuerySize: 100
+            schedule:
+              frequency: { hours: 1 }
+              timeout: { minutes: 50 }
+              initialDelay: { seconds: 15 }
       locations:
-        # The workshop/catalog repo is seeded by gitea/init/job-admin-init.yaml.
+        # Gitea catalog location — repo seeded by gitea/init/job-admin-init.yaml
+        # Add additional locations here ...
         - type: url
           target: https://gitea.apps.snoaxolab.axodevelopment.dev/workshop/catalog/raw/branch/main/catalog-info.yaml
           rules:
