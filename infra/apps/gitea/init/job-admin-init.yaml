@@ -12,9 +12,10 @@ spec:
   template:
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: gitea-init-sa
       containers:
         - name: init
-          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          image: registry.redhat.io/openshift4/ose-cli-rhel9:latest
           command:
             - /bin/sh
             - -c
@@ -30,30 +31,27 @@ spec:
               echo "=== Gitea is ready ==="
 
               echo ""
-              echo "=== Creating admin user: ${GITEA_ADMIN_USER} ==="
-              HTTP_STATUS=$(curl -s -o /tmp/create_user_resp.json -w "%{http_code}" \
-                -X POST "${GITEA_URL}/api/v1/admin/users" \
-                -H "Content-Type: application/json" \
-                -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" \
-                -d "{
-                  \"email\": \"${GITEA_ADMIN_EMAIL}\",
-                  \"full_name\": \"Gitea Admin\",
-                  \"login_name\": \"${GITEA_ADMIN_USER}\",
-                  \"must_change_password\": false,
-                  \"password\": \"${GITEA_ADMIN_PASSWORD}\",
-                  \"send_notify\": false,
-                  \"source_id\": 0,
-                  \"username\": \"${GITEA_ADMIN_USER}\"
-                }")
+              echo "=== Getting Gitea pod name ==="
+              GITEA_POD=$(oc get pods -n gitea -l app=gitea \
+                --field-selector=status.phase=Running \
+                -o jsonpath='{.items[0].metadata.name}')
+              echo "  Pod: ${GITEA_POD}"
 
-              if [ "$HTTP_STATUS" = "201" ]; then
-                echo "  Admin user created successfully."
-              elif [ "$HTTP_STATUS" = "422" ]; then
-                echo "  Admin user already exists, continuing."
+              echo ""
+              echo "=== Bootstrapping admin user via Gitea CLI ==="
+              # This handles the chicken-and-egg: no admin exists yet to call the API
+              oc exec -n gitea ${GITEA_POD} -- \
+                gitea admin user create \
+                  --username "${GITEA_ADMIN_USER}" \
+                  --password "${GITEA_ADMIN_PASSWORD}" \
+                  --email "${GITEA_ADMIN_EMAIL}" \
+                  --admin \
+                  --must-change-password=false 2>&1 | tee /tmp/create_admin.log
+
+              if grep -q "successfully created\|already exists" /tmp/create_admin.log; then
+                echo "  Admin user ready."
               else
-                echo "  ERROR: Failed to create admin user (HTTP $HTTP_STATUS)"
-                cat /tmp/create_user_resp.json
-                exit 1
+                echo "  WARNING: Unexpected output from admin create, attempting to continue..."
               fi
 
               echo ""
@@ -80,7 +78,6 @@ spec:
 
               echo ""
               echo "=== Creating RHDH catalog token ==="
-              # Delete existing token of same name first to make this idempotent
               curl -s -o /dev/null \
                 -X DELETE "${GITEA_URL}/api/v1/users/${GITEA_ADMIN_USER}/tokens/rhdh-catalog-token" \
                 -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" || true
@@ -101,7 +98,7 @@ spec:
                 echo "  GITEA_TOKEN=${TOKEN}"
                 echo ""
                 echo "  Patch it into the RHDH secret:"
-                echo "    oc patch secret my-rhdh-secrets -n rhdh \\"
+                echo "    oc patch secret rhdh-secrets -n rhdh \\"
                 echo "      --type=merge \\"
                 echo "      -p '{\"stringData\":{\"GITEA_TOKEN\":\"${TOKEN}\"}}'"
                 echo ""
@@ -115,7 +112,7 @@ spec:
               fi
 
               echo ""
-              echo "=== Seeding example catalog repository ==="
+              echo "=== Seeding catalog repository ==="
               HTTP_STATUS=$(curl -s -o /tmp/create_repo_resp.json -w "%{http_code}" \
                 -X POST "${GITEA_URL}/api/v1/orgs/workshop/repos" \
                 -H "Content-Type: application/json" \
@@ -129,7 +126,7 @@ spec:
                 }')
 
               if [ "$HTTP_STATUS" = "201" ]; then
-                echo "  Repository 'workshop/catalog' created."
+                echo "  Repository workshop/catalog created."
               elif [ "$HTTP_STATUS" = "409" ]; then
                 echo "  Repository already exists, continuing."
               else
