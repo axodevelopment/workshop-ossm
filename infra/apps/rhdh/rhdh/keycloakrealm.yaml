@@ -21,7 +21,7 @@ spec:
         standardFlowEnabled: true
         directAccessGrantsEnabled: false
         serviceAccountsEnabled: false
-        secret: <same-value-as-KEYCLOAK_CLIENT_SECRET>
+        secret: 123456-keycloak-client-secret
         redirectUris:
           - "https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev/*"
         webOrigins:
@@ -53,7 +53,7 @@ spec:
         lastName: Admin
         credentials:
           - type: password
-            value: ChangeMe123!
-            temporary: true
+            value: "ChangeMe123!"
+            temporary: false
         groups:
           - rhdh-admins
