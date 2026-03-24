@@ -12,17 +12,11 @@ data:
 
     plugins:
       # ── RBAC ──────────────────────────────────────────────────────────────
-      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-community-plugin-rbac'
+      - package: 'oci://quay.io/rhdh/backstage-community-plugin-rbac:1.9.0--1.45.1!backstage-community-plugin-rbac'
         disabled: false
 
-      # ── OIDC auth backend ─────────────────────────────────────────────────
-      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-plugin-auth-backend-module-oidc-provider'
-        disabled: false
-
-      # ── TechDocs ──────────────────────────────────────────────────────────
-      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-plugin-techdocs'
-        disabled: false
-      - package: 'oci://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad!backstage-plugin-techdocs-backend'
+      # ── TechDocs frontend ─────────────────────────────────────────────────
+      - package: 'oci://quay.io/rhdh/backstage-plugin-techdocs:1.9.0--1.14.1!backstage-plugin-techdocs'
         disabled: false
 
       # ── Gitea scaffolder (external OCI) ───────────────────────────────────

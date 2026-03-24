@@ -303,3 +303,14 @@ jwksUri doesn't work with self-signed OCP router cert — using inline jwks
 AuthorizationPolicy ALLOW creates implicit deny for non-matching requests
 
 Gateway API HTTPRoute and VirtualService conflict on same service — pick one
+
+
+# RHDH - Red Hat Developer Hub -> DOCS
+
+We can see plugin names for new oci format
+
+oci://image@sha256!plugin-name
+
+skopeo inspect docker://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad | python3 -m json.tool | grep -i "label\|title\|plugin"
+
+
