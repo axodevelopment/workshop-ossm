@@ -21,7 +21,8 @@ spec:
         standardFlowEnabled: true
         directAccessGrantsEnabled: false
         serviceAccountsEnabled: false
-        secret: 123456-keycloak-client-secret
+        # maps to rhdh-secrets -> KEYCLOAK_CLIENT_SECRET -> Realm -> client secret
+        secret: wG03JcQaSP78in8riVrrJNq1Uyo8SbvT"
         redirectUris:
           - "https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev/*"
         webOrigins:
