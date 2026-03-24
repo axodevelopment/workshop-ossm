@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: rhdh-app-config
   namespace: rhdh
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 data:
   app-config.yaml: |
     app:
@@ -42,10 +44,6 @@ data:
             clientId: ${KEYCLOAK_CLIENT_ID}
             clientSecret: ${KEYCLOAK_CLIENT_SECRET}
             prompt: auto
-            # Uncomment if you need role-based sign-in resolution:
-            # signIn:
-            #   resolvers:
-            #     - resolver: preferredUsernameMatchingUserEntityName
       dangerouslyAllowSignInWithoutUserInCatalog: true
 
     signInPage: oidc
@@ -58,26 +56,29 @@ data:
 
     catalog:
       rules:
-        - allow: [Component, System, API, Resource, Location, Template, User, Group]
+        - allow:
+            - Component
+            - System
+            - API
+            - Resource
+            - Location
+            - Template
+            - User
+            - Group
       locations:
-        # TODO: check url path here 
+        # The workshop/catalog repo is seeded by gitea/init/job-admin-init.yaml.
         - type: url
           target: https://gitea.apps.snoaxolab.axodevelopment.dev/workshop/catalog/raw/branch/main/catalog-info.yaml
           rules:
-            - allow: [Component, System, API, Resource, Location, Template, User, Group]
-      providers:
-        gitea:
-          snoaxolab:
-            host: ${GITEA_BASE_URL}
-            orgName: '*'
-            catalogPath: /catalog-info.yaml
-            filters:
-              branch: main
-            schedule:
-              frequency:
-                minutes: 30
-              timeout:
-                minutes: 3
+            - allow:
+                - Component
+                - System
+                - API
+                - Resource
+                - Location
+                - Template
+                - User
+                - Group
 
     techdocs:
       builder: local

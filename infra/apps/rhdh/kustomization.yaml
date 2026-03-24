@@ -6,3 +6,4 @@ resources:
 - redis/deployment.yaml
 - postgres/service.yaml
 - postgres/statefulset.yaml
+- postgres/job-grant-createdb.yaml

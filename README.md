@@ -313,4 +313,19 @@ oci://image@sha256!plugin-name
 
 skopeo inspect docker://registry.access.redhat.com/rhdh/plugin-catalog-index@sha256:88c3f42ee9f203784c4a8b364b34ee0099b01ca4596762ccf5933d97f252e3ad | python3 -m json.tool | grep -i "label\|title\|plugin"
 
+# postgres issue
+
+oc exec -n rhdh statefulset/postgresql -- \
+  psql -U backstage -d backstage -c "SELECT 1"
+
+oc exec -n rhdh statefulset/postgresql -- \
+  psql -U backstage -d backstage -c "\du"
+                                   List of roles
+ Role name |                         Attributes                         | Member of 
+-----------+------------------------------------------------------------+-----------
+ backstage |                                                            | {}
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+
+Forgot admin password...
+
 
