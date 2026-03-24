@@ -30,3 +30,5 @@ data:
   GITEA__log__LEVEL: "info"
   GITEA__webhook__ALLOWED_HOST_LIST: "*"
   GITEA__APP_NAME: "Gitea - snoaxolab Workshop"
+  GITEA__indexer__ISSUE_INDEXER_TYPE: "bleve"
+  GITEA__indexer__REPO_INDEXER_ENABLED: "true"

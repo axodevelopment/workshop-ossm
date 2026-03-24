@@ -59,6 +59,12 @@ data:
     catalog:
       rules:
         - allow: [Component, System, API, Resource, Location, Template, User, Group]
+      locations:
+        # TODO: check url path here 
+        - type: url
+          target: https://gitea.apps.snoaxolab.axodevelopment.dev/workshop/catalog/raw/branch/main/catalog-info.yaml
+          rules:
+            - allow: [Component, System, API, Resource, Location, Template, User, Group]
       providers:
         gitea:
           snoaxolab:
