@@ -377,3 +377,13 @@ curl -s -X DELETE "${KEYCLOAK_ROUTE}/admin/realms/rhdh" \
 oc delete keycloakrealmimport rhdh-realm -n keycloak
 oc apply -f infra/apps/rhdh/rhdh/keycloakrealm.yaml
 
+# gitea create catalog yaml
+
+curl -s -X POST \
+  "https://gitea.apps.snoaxolab.axodevelopment.dev/api/v1/repos/workshop/catalog/contents/catalog-info.yaml" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: token cce43b068e4290bf0cba487964876ce12b118a12" \
+  -d "{
+    \"message\": \"Add initial catalog-info.yaml\",
+    \"content\": \"$(printf 'apiVersion: backstage.io/v1alpha1\nkind: Location\nmetadata:\n  name: workshop-catalog\n  description: Workshop software catalog root\nspec:\n  targets: []\n' | base64 -w 0)\"
+  }"
