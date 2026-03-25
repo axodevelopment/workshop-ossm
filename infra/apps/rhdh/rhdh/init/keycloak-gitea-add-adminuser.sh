@@ -16,8 +16,13 @@ spec:
     - rhdh-admins
 ' | base64 -w 0)
 
+#comes from the git init job its the giteatoken
+
+GITEA_TOKEN=$(oc get secret rhdh-secrets -n rhdh -o jsonpath='{.data.GITEA_TOKEN}' | base64 -d)
+
+
 curl -sk -X POST \
   "https://gitea.apps.snoaxolab.axodevelopment.dev/api/v1/repos/workshop/catalog/contents/users/rhdh-admin.yaml" \
   -H "Content-Type: application/json" \
-  -H "Authorization: token cce43b068e4290bf0cba487964876ce12b118a12" \
+  -H "Authorization: token ${GITEA_TOKEN}" \
   -d "{\"message\":\"Add rhdh-admin user entity\",\"content\":\"${CONTENT}\"}"

@@ -571,3 +571,123 @@ curl -s -X POST \
     \"message\": \"Add initial catalog-info.yaml\",
     \"content\": \"$(printf 'apiVersion: backstage.io/v1alpha1\nkind: Location\nmetadata:\n  name: workshop-catalog\n  description: Workshop software catalog root\nspec:\n  targets: []\n' | base64 -w 0)\"
   }"
+
+
+  # RHDH - rhdh-app-config.yaml breakdown
+
+I'll skip things I think are obvious
+
+```
+  app-config.yaml: |
+    app:
+      title: Red Hat Developer Hub — snoaxolab
+      baseUrl: https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev        # <- match route
+
+    branding:
+      fullLogo: ${BASE64_EMBEDDED_FULL_LOGO}
+      fullLogoWidth: 110px
+      iconLogo: ${BASE64_EMBEDDED_ICON_LOGO}
+
+    backend:
+      baseUrl: https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev
+      cors:
+        origin: https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev       #<- cors origin setup
+      cache:
+        store: redis
+        connection: redis://:${REDIS_PASSWORD}@redis.rhdh.svc.cluster.local:6379    #<- configure redis for cache
+      database:                                                                     #<- configure pg
+        client: pg
+        connection:
+          host: ${POSTGRES_HOST}
+          port: ${POSTGRES_PORT}
+          user: ${POSTGRES_USER}
+          password: ${POSTGRES_PASSWORD}
+          database: backstage
+
+    auth:
+      environment: production                                                       #<- set to production to skip guest login
+      session:
+        secret: ${SESSION_SECRET}                                                   #<- openssl rand -hex 32 in rhdh-secrets.yaml
+      providers:
+        oidc:
+          production:
+            metadataUrl: "${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration" #<- this seems right but not in docs but normal oidc path
+            clientId: ${KEYCLOAK_CLIENT_ID}                                         #<- KEYCLOAK_CLIENT_IDin rhdh-ssecrets AND import spec.realm.clients.clientid
+            clientSecret: ${KEYCLOAK_CLIENT_SECRET}                                 #<- pulled from keycloak -> clients -> rhdh -> credentials -> Client Secret
+            prompt: auto                                                            #<- keycloak decides if login needs to be shown || none
+            dangerouslyAllowSignInWithoutUserInCatalog: true                        #<- supposedly I can login without users provisioned in rhdh but this didn't do anything if i changed it, so im missing something.  Also checking docs it shows under signIn.resolves.dange... so .. maybe
+            signIn:
+              resolvers:
+                - resolver: preferredUsernameMatchingUserEntityName                 #< match entity map, i should switch this to oidcSubClaimMatchingKeycloakUserId instead to do a sub claim but i'll look at that later, but it checks metadata.name
+                - resolver: emailMatchingUserEntityProfileEmail
+                - resolver: emailLocalPartMatchingUserEntityName
+
+    signInPage: oidc                                                                #<- configure oidc signing>
+
+    integrations:
+      gitea:                                                                        #<- currently generating with gitea-admin-init -> rhdh-secrets
+        - host: ${GITEA_HOST}
+          username: gitea-admin
+          password: ${GITEA_TOKEN}                                                  #<- manual process where this gets filled out by the init process>
+
+    catalog:
+      rules:
+        - allow:                                                                    #< things to be ingested into rhdh>
+            - Component
+            - System
+            - API
+            - Resource
+            - Location
+            - Template
+            - User
+            - Group
+      providers:
+        keycloakOrg:
+          default:                                                                  #< rhdh-seecrets
+            baseUrl: ${KEYCLOAK_BASE_URL}
+            clientId: ${KEYCLOAK_CLIENT_ID}
+            clientSecret: ${KEYCLOAK_CLIENT_SECRET}
+            realm: ${KEYCLOAK_REALM}
+            loginRealm: ${KEYCLOAK_LOGIN_REALM}
+            userQuerySize: 100
+            groupQuerySize: 100
+            schedule:
+              frequency: { hours: 1 }
+              timeout: { minutes: 50 }
+              initialDelay: { seconds: 15 }
+      locations:
+        # Gitea catalog location — repo seeded by gitea/init/job-admin-init.yaml
+        # Add additional locations here ...
+        - type: url
+          target: https://gitea.apps.snoaxolab.axodevelopment.dev/workshop/catalog/raw/branch/main/catalog-info.yaml
+          rules:
+            - allow:
+                - Component
+                - System
+                - API
+                - Resource
+                - Location
+                - Template
+                - User
+                - Group
+
+    techdocs:
+      builder: local                                                                #< can support external storage>
+      generator:
+        runIn: local                                                                #< the generator runs in the pod itself
+      publisher:
+        type: local                                                                 #< Stores generated docs on the local filesystem inside the pod. Lost on pod restart. = production i'll look at s3or  googleGcs, or azureBlobStorag>
+      cache:
+        ttl: 3600000
+
+    permission:
+      enabled: true
+      rbac:
+        admin:
+          users:
+            - name: user:default/rhdh-admin
+        pluginsWithPermission:
+          - catalog
+          - scaffolder
+          - permission
+```
