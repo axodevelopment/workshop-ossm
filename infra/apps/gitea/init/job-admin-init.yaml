@@ -38,7 +38,6 @@ spec:
               echo "  Pod: ${GITEA_POD}"
 
               echo ""
-              
               echo "=== Bootstrapping admin user via Gitea CLI ==="
               oc exec -n gitea ${GITEA_POD} -- \
                 su-exec git gitea admin user create \
@@ -46,15 +45,16 @@ spec:
                   --password "${GITEA_ADMIN_PASSWORD}" \
                   --email "${GITEA_ADMIN_EMAIL}" \
                   --admin \
-                  --must-change-password=false 2>&1 | tee /tmp/create_admin.log
+                  --must-change-password=false 2>&1 | tee /tmp/create_admin.log || true
 
-              if grep -q "successfully created\|already exists" /tmp/create_admin.log; then
+              if grep -q "successfully created\|already exists\|user already exists" /tmp/create_admin.log; then
                 echo "  Admin user ready."
               elif grep -q "is not supposed to be run as root" /tmp/create_admin.log; then
                 echo "  ERROR: Gitea running as root, su-exec failed. Check deployment securityContext."
                 exit 1
               else
-                echo "  WARNING: Unexpected output, attempting to continue..."
+                echo "  WARNING: Unexpected output from admin create, attempting to continue..."
+                cat /tmp/create_admin.log
               fi
 
               echo ""
@@ -81,6 +81,7 @@ spec:
 
               echo ""
               echo "=== Creating RHDH catalog token ==="
+              # Delete existing token first to make this idempotent
               curl -s -o /dev/null \
                 -X DELETE "${GITEA_URL}/api/v1/users/${GITEA_ADMIN_USER}/tokens/rhdh-catalog-token" \
                 -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" || true
@@ -89,7 +90,14 @@ spec:
                 -X POST "${GITEA_URL}/api/v1/users/${GITEA_ADMIN_USER}/tokens" \
                 -H "Content-Type: application/json" \
                 -u "${GITEA_ADMIN_USER}:${GITEA_ADMIN_PASSWORD}" \
-                -d '{"name": "rhdh-catalog-token"}')
+                -d '{
+                  "name": "rhdh-catalog-token",
+                  "scopes": [
+                    "read:repository",
+                    "read:user",
+                    "read:organization"
+                  ]
+                }')
 
               if [ "$HTTP_STATUS" = "201" ]; then
                 TOKEN=$(cat /tmp/create_token_resp.json | grep -o '"sha1":"[^"]*"' | cut -d'"' -f4)
