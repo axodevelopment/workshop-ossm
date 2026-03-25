@@ -716,3 +716,37 @@ probably ok
 ```
 echo "GITEA_ADMIN_PASSWORD: $(openssl rand -base64 20)"
 ```
+
+values in `` are default to keycloak atm
+
+maybe something like
+
+```
+KC_PASS=$(openssl rand -base64 20)
+echo "username: $(echo -n 'keycloak' | base64)"
+echo "password: $(echo -n ${KC_PASS} | base64)"
+```
+
+values for this`rhdh/security/rhdh-secrets.yaml`
+
+
+| Key | Type | How to set |
+|-----|------|------------|
+| `REDIS_PASSWORD` | Generate | `openssl rand -base64 20` |
+| `POSTGRES_USER` | Fixed | `backstage` |
+| `POSTGRES_PASSWORD` | Generate | `openssl rand -base64 20` |
+| `POSTGRES_ADMIN_PASSWORD` | Generate | `openssl rand -base64 20` |
+| `POSTGRES_HOST` | Fixed | `postgresql` (k8s service name) |
+| `POSTGRES_PORT` | Fixed | `5432` |
+| `KEYCLOAK_CLIENT_ID` | Fixed | `rhdh` |
+| `KEYCLOAK_CLIENT_SECRET` | From Keycloak | Copy from Keycloak UI after realm import |
+| `KEYCLOAK_BASE_URL` | From cluster | `https://keycloak.apps.<cluster-domain>` |
+| `KEYCLOAK_REALM` | Fixed | `rhdh` |
+| `KEYCLOAK_LOGIN_REALM` | Fixed | `rhdh` |
+| `SESSION_SECRET` | Generate | `openssl rand -hex 32` |
+| `GITEA_TOKEN` | From job | Copy from gitea-admin-init job logs |
+| `GITEA_BASE_URL` | From cluster | `https://gitea.apps.<cluster-domain>` |
+| `GITEA_HOST` | From cluster | `gitea.apps.<cluster-domain>` |
+| `BASE64_EMBEDDED_FULL_LOGO` | From file | `data:image/svg+xml;base64,$(cat logo.svg \| base64 -w 0)` |
+| `BASE64_EMBEDDED_ICON_LOGO` | From file | same as above for icon |
+| `NODE_TLS_REJECT_UNAUTHORIZED` | Fixed | `0` (dev only) |
