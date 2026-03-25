@@ -38,10 +38,10 @@ spec:
               echo "  Pod: ${GITEA_POD}"
 
               echo ""
+              
               echo "=== Bootstrapping admin user via Gitea CLI ==="
-              # This handles the chicken-and-egg: no admin exists yet to call the API
               oc exec -n gitea ${GITEA_POD} -- \
-                gitea admin user create \
+                su-exec git gitea admin user create \
                   --username "${GITEA_ADMIN_USER}" \
                   --password "${GITEA_ADMIN_PASSWORD}" \
                   --email "${GITEA_ADMIN_EMAIL}" \
@@ -50,8 +50,11 @@ spec:
 
               if grep -q "successfully created\|already exists" /tmp/create_admin.log; then
                 echo "  Admin user ready."
+              elif grep -q "is not supposed to be run as root" /tmp/create_admin.log; then
+                echo "  ERROR: Gitea running as root, su-exec failed. Check deployment securityContext."
+                exit 1
               else
-                echo "  WARNING: Unexpected output from admin create, attempting to continue..."
+                echo "  WARNING: Unexpected output, attempting to continue..."
               fi
 
               echo ""
