@@ -1,5 +1,3 @@
-
-
 # workshop-ossm
 
 # TODO: Current needs.
@@ -22,6 +20,192 @@ Tempo gossip ring issues when in ambient mesh
 ~/workshop-ossm/argocd/projects$ oc apply -f .
 
 
+# Current order of things.
+
+step 1
+
+1. Create namespaces: rhdh, rhdh-operator, gitea, keycloak
+2. Create OperatorGroup for rhdh-operator (AllNamespaces — OwnNamespace unsupported)
+3. Install RHDH operator via Subscription (watches all namespaces)
+4. Verify operator pod running in rhdh-operator namespace
+
+2 postgerss
+
+1. Create rhdh-secrets containing:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+   - POSTGRES_ADMIN_PASSWORD
+   - POSTGRES_HOST
+   - POSTGRES_PORT
+   - REDIS_PASSWORD
+   - SESSION_SECRET
+   - KEYCLOAK_CLIENT_ID
+   - KEYCLOAK_CLIENT_SECRET
+   - KEYCLOAK_BASE_URL
+   - KEYCLOAK_REALM
+   - KEYCLOAK_LOGIN_REALM
+   - GITEA_TOKEN        (placeholder — will be patched later)
+   - GITEA_HOST
+   - GITEA_BASE_URL
+   - NODE_TLS_REJECT_UNAUTHORIZED=0  (dev only)
+
+2. Deploy PostgreSQL StatefulSet referencing rhdh-secrets
+3. Verify PostgreSQL pod running and accepting connections
+4. Run job-grant-createdb (PostSync hook):
+   - Connects as postgres admin
+   - Grants CREATEDB to backstage user
+   - Verify job completes successfully
+
+
+step 3 redis
+
+1. Deploy Redis using REDIS_PASSWORD from rhdh-secrets
+2. Verify Redis pod running
+
+
+Step 4 - Gitea
+
+1. Create gitea namespace secrets:
+   - gitea-admin-secret:
+     GITEA_ADMIN_USER
+     GITEA_ADMIN_PASSWORD
+     GITEA_ADMIN_EMAIL
+   - gitea-postgres-secret:
+     POSTGRES_USER
+     POSTGRES_PASSWORD
+     POSTGRES_HOST
+     POSTGRES_PORT
+     POSTGRES_DB
+
+2. Create gitea ServiceAccount + ClusterRoleBinding (anyuid SCC)
+3. Create gitea-init-sa ServiceAccount + Role + RoleBinding (pod exec permissions)
+4. Deploy PostgreSQL for Gitea
+5. Deploy Gitea:
+   - Empty container securityContext {}
+   - fsGroup: 1000 at pod level
+   - All config via GITEA__section__key env vars (no app.ini mount)
+   - Gitea binary refuses to run as root — su-exec git handles this
+6. Verify Gitea pod running and /api/healthz returns 200
+
+7. Run gitea-admin-init job (PostSync hook):
+   a. Bootstraps admin user via: oc exec su-exec git gitea admin user create
+   b. Creates 'workshop' organisation
+   c. Creates 'rhdh-catalog-token' with scopes: read:repository, read:user, read:organization
+   d. Creates 'workshop/catalog' repo
+   e. Seeds catalog-info.yaml into repo
+
+8. MANUAL: Copy GITEA_TOKEN from job logs
+9. MANUAL: oc patch secret rhdh-secrets -n rhdh with the token value
+10. MANUAL: Create or update catalog-info.yaml in workshop/catalog repo
+    (if not seeded by job) — minimum content is a Location kind pointing to catalog targets
+
+
+Step 5 - Keycloak
+
+1. Apply KeycloakRealmImport CR in keycloak namespace
+   CRITICAL settings in the CR:
+   - serviceAccountsEnabled: true   ← must be true or catalog sync silently returns 0 users
+   - standardFlowEnabled: true
+   - directAccessGrantsEnabled: false
+   - publicClient: false
+   - secret: <KEYCLOAK_CLIENT_SECRET matching rhdh-secrets>
+
+2. Wait for KeycloakRealmImport status to show Done
+   NOTE: If realm already exists, import is skipped — must delete realm via API first
+
+3. Verify in Keycloak UI that realm 'rhdh' exists with client 'rhdh'
+
+4. MANUAL: Keycloak UI → realm rhdh → Clients → rhdh → Settings tab
+   - Confirm Service accounts roles toggle is ON
+   - If not, enable it and Save
+
+5. MANUAL: Keycloak UI → Clients → rhdh → Service accounts roles tab
+   - Click Assign role
+   - Filter by: realm-management client
+   - Assign: view-users
+   NOTE: This cannot be done via the KeycloakRealmImport CR
+
+6. Verify in Keycloak UI → Clients → rhdh → Service accounts roles:
+   - view-users from realm-management is listed
+
+7. Verify the following exist in the rhdh realm:
+   Realm roles:
+   - rhdh-admin
+   - rhdh-user
+   Groups:
+   - rhdh-admins  (has rhdh-admin realm role)
+   - rhdh-users   (has rhdh-user realm role)
+   Users:
+   - rhdh-admin (email: rhdh-admin@example.com, in group: rhdh-admins, temporary: false)
+
+
+Step 6 - RHDH
+
+1. Verify rhdh-secrets has all required keys (see Phase 2 list)
+   KEYCLOAK_BASE_URL must be server root: https://keycloak.apps.xxx.xxx
+   NOT: https://keycloak.apps.xxx.xxx/realms/rhdh
+
+2. Apply rhdh-app-config ConfigMap with:
+   - keycloakOrg catalog provider (baseUrl = server root, realm and loginRealm separate)
+   - OIDC auth provider (metadataUrl = ${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration)
+   - Gitea integration (host, username, password/token)
+   - Catalog location pointing to Gitea workshop/catalog repo
+   - RBAC admin: user:default/rhdh-admin
+
+3. Apply dynamic-plugins ConfigMap with at minimum:
+   - backstage-community-plugin-catalog-backend-module-keycloak-dynamic (local path, disabled: false)
+   - backstage-community-plugin-rbac (OCI ref, disabled: false)
+   - backstage-plugin-auth-backend-module-oidc-provider (OCI ref, disabled: false)
+   - backstage-plugin-techdocs + backend (OCI refs or local, disabled: false)
+   - backstage-plugin-scaffolder-backend-module-gitea (OCI ref, disabled: false)
+
+4. Apply Backstage CR (v1alpha3):
+   - enableLocalDb: false
+   - refs rhdh-secrets and rhdh-app-config
+
+5. Wait for RHDH pod to reach Running state
+6. Watch logs for Keycloak sync (appears ~15s after startup):
+   "Read N Keycloak users and N Keycloak groups... Committing..."
+   "Committed N Keycloak users and N Keycloak groups"
+
+7. Verify catalog has users:
+   curl .../api/catalog/entities?filter=kind=User | check count > 0
+
+
+Step 7 - Things to verify
+
+1. Navigate to https://backstage-rhdh-rhdh.apps.xxx.xxx
+2. Sign in using OIDC button should appear (no Guest login in production mode)
+3. Login with rhdh-admin / ChangeMe123!
+4. Verify RBAC admin access (Administration menu visible)
+5. Verify Catalog shows at least the workshop-catalog Location entity
+6. Verify Gitea integration (try creating a component via scaffolder)
+
+
+Issues - Things i need to fix
+
+KEYCLOAK_BASE_URL = server root only (keycloakOrg appends realm itself)
+serviceAccountsEnabled: true on rhdh Keycloak client
+view-users role assigned to service account (manual step every realm re-import)
+KeycloakRealmImport is one-shot — delete realm via API before re-importing
+Gitea binary refuses root — all exec commands need: su-exec git gitea ...
+Gitea token creation requires explicit scopes in 1.22+
+RHDH operator requires AllNamespaces OperatorGroup (OwnNamespace not supported)
+WaitForFirstConsumer storage: PVC must be same sync-wave as Deployment
+NODE_TLS_REJECT_UNAUTHORIZED=0 required for self-signed OCP certs (dev only)
+GITEA_TOKEN handoff is manual until Ansible automation is built
+
+TODO: more todo
+
+1. Read GITEA_TOKEN from job logs
+2. Patch rhdh-secrets with token
+3. Restart RHDH deployment
+4. Assign view-users to Keycloak service account via API
+5. Verify Keycloak sync committed users
+6. Get rid of keycloakrealm imports they are the bane of my existance
+7. Smoke test login
+
+### notes
 
 for subs
 

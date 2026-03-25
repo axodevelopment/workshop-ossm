@@ -20,9 +20,9 @@ spec:
         publicClient: false
         standardFlowEnabled: true
         directAccessGrantsEnabled: false
-        serviceAccountsEnabled: true          # was false — needs true for catalog sync
+        serviceAccountsEnabled: true
         authorizationServicesEnabled: false
-        secret: "wG03JcQaSP78in8riVrrJNq1Uyo8SbvT"  # removed stray trailing quote
+        secret: "wG03JcQaSP78in8riVrrJNq1Uyo8SbvT"
         redirectUris:
           - "https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev/*"
         webOrigins:
