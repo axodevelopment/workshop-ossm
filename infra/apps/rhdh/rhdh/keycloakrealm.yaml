@@ -20,9 +20,9 @@ spec:
         publicClient: false
         standardFlowEnabled: true
         directAccessGrantsEnabled: false
-        serviceAccountsEnabled: false
-        # maps to rhdh-secrets -> KEYCLOAK_CLIENT_SECRET -> Realm -> client secret
-        secret: wG03JcQaSP78in8riVrrJNq1Uyo8SbvT"
+        serviceAccountsEnabled: true          # was false — needs true for catalog sync
+        authorizationServicesEnabled: false
+        secret: "wG03JcQaSP78in8riVrrJNq1Uyo8SbvT"  # removed stray trailing quote
         redirectUris:
           - "https://backstage-rhdh-rhdh.apps.snoaxolab.axodevelopment.dev/*"
         webOrigins:
