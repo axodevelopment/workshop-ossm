@@ -691,3 +691,28 @@ I'll skip things I think are obvious
           - scaffolder
           - permission
 ```
+
+
+# PRE START config checks
+
+values in `gitea/security/secret-app.yaml` are generated
+
+```
+echo "SECRET_KEY: $(openssl rand -hex 32)"
+echo "INTERNAL_TOKEN: $(openssl rand -hex 32)"  
+echo "JWT_SECRET: $(openssl rand -hex 32)"
+```
+
+values in `gitea/security/secret-admin.yaml` are mix
+
+```
+GITEA_ADMIN_USER    — hardcoded, "gitea-admin"
+GITEA_ADMIN_PASSWORD — SET THIS
+GITEA_ADMIN_EMAIL   — update domain to match your cluster
+```
+
+probably ok
+
+```
+echo "GITEA_ADMIN_PASSWORD: $(openssl rand -base64 20)"
+```
