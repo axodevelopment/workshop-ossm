@@ -750,3 +750,10 @@ values for this`rhdh/security/rhdh-secrets.yaml`
 | `BASE64_EMBEDDED_FULL_LOGO` | From file | `data:image/svg+xml;base64,$(cat logo.svg \| base64 -w 0)` |
 | `BASE64_EMBEDDED_ICON_LOGO` | From file | same as above for icon |
 | `NODE_TLS_REJECT_UNAUTHORIZED` | Fixed | `0` (dev only) |
+
+
+
+# Removing keycloak oauth... I need to seperate that from this project all together
+
+oc patch oauth cluster --type=json \
+  -p='[{"op":"remove","path":"/spec/identityProviders"}]'
